@@ -19,6 +19,8 @@
       --shadow: 0 18px 60px rgba(0,0,0,0.48);
       --radius: 18px;
       --accent: rgba(155,231,255,0.18);
+      --toggleBg: rgba(255,255,255,0.06);
+      --toggleActive: rgba(255, 215, 140, 0.25);
     }
 
     *{ box-sizing:border-box; }
@@ -40,7 +42,7 @@
       padding: 18px 16px 50px;
     }
 
-    /* Banner: full-width page banner */
+    /* Banner */
     .banner{
       display:flex;
       justify-content:center;
@@ -56,18 +58,26 @@
     }
     .bannerFrame img{
       width: 100%;
-      height: 220px;      /* thin-ish banner */
-      object-fit: cover;  /* fills width nicely */
+      height: 220px;
+      object-fit: cover;
       display:block;
     }
 
-    /* Controls row: right under banner */
-    .controls{
+    /* Controls layout: LEFT aligned */
+    .controlsWrap{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start; /* key */
+      gap:10px;
+      margin: 8px 0 8px;
+    }
+
+    .controlsRow{
       display:flex;
       flex-wrap:wrap;
-      justify-content:flex-end;
+      justify-content:flex-start; /* key */
       gap:12px;
-      margin: 8px 0 8px;
+      width:100%;
     }
 
     .field{
@@ -88,6 +98,7 @@
       white-space: nowrap;
     }
 
+    /* Removed "Vedic Text" label: keep select nicely sized */
     select{
       appearance:none;
       border: 1px solid rgba(255,255,255,0.12);
@@ -96,41 +107,57 @@
       border-radius: 14px;
       padding: 10px 12px;
       font-size: 14px;
-      min-width: 210px;
+      min-width: 270px;
     }
     select option{ background:#0b1020; }
 
-    /* Toggle */
+    /* Toggle row (next line) */
+    .toggleRow{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+      width:100%;
+    }
+
+    .toggleHint{
+      font-size: 12.5px;
+      color: var(--muted);
+      padding-left: 2px;
+    }
+
     .toggle{
       display:flex;
       gap:6px;
       padding: 6px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 22px rgba(0,0,0,0.20);
+      background: var(--toggleBg);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.25);
       backdrop-filter: blur(12px);
     }
     .toggle button{
       border:0;
-      padding: 9px 14px;
+      padding: 10px 16px;
       border-radius: 999px;
       background: transparent;
-      color: var(--muted);
+      color: rgba(255,255,255,0.78);
       cursor:pointer;
-      font-size: 13px;
+      font-size: 13.5px;
+      letter-spacing: 0.2px;
     }
     .toggle button.active{
-      background: var(--accent);
-      color: var(--text);
-      box-shadow: inset 0 0 0 1px rgba(155,231,255,0.25);
+      background: var(--toggleActive);
+      color: rgba(255,255,255,0.96);
+      box-shadow: inset 0 0 0 1px rgba(255, 215, 140, 0.40);
     }
 
-    /* Status line under controls */
+    /* Status line */
     .statusRow{
       display:flex;
-      justify-content:flex-end;
-      margin: 0 0 12px;
+      justify-content:flex-start;  /* align left */
+      margin: 2px 0 12px;
+      width:100%;
     }
     .statusPill{
       background: rgba(255,255,255,0.05);
@@ -165,7 +192,7 @@
       line-height: 1.35;
     }
 
-    /* Use <video> for MP4 reliability but make it look like an audio player */
+    /* <video> used for MP4 reliability */
     #audioPlayer{
       width:100%;
       height: 56px;
@@ -196,7 +223,6 @@
       overflow:auto;
     }
 
-    /* Better typography for converted DOCX */
     .docBody p{ margin:0 0 10px; line-height:1.6; color: rgba(255,255,255,0.88); }
     .docBody h1, .docBody h2, .docBody h3{ margin: 14px 0 10px; }
     .docBody ul{ margin: 8px 0 12px 20px; }
@@ -225,6 +251,26 @@
       font-size: 12.5px;
       color: rgba(255,255,255,0.65);
     }
+
+    /* -------- Mobile fixes -------- */
+    @media (max-width: 640px){
+      .wrap{ padding: 12px 12px 40px; }
+
+      /* remove heavy frame/shadow that can look like a dark box */
+      .bannerFrame{
+        border: none;
+        box-shadow: none;
+        border-radius: 12px;
+        background: transparent;
+      }
+      .bannerFrame img{
+        height: 140px;       /* thinner on phone */
+        object-fit: cover;
+        border-radius: 12px;
+      }
+
+      select{ min-width: 240px; }
+    }
   </style>
 </head>
 
@@ -234,54 +280,58 @@
     <!-- Banner -->
     <div class="banner">
       <div class="bannerFrame">
-        <!-- Your new banner file -->
-        <img src="Vedic_podcast_banner_2.png" alt="Veda Padārtha Anvaya Podcasts">
+        <img src="Vedic_podcast_banner_2.PNG" alt="Veda Padārtha Anvaya Podcasts">
       </div>
     </div>
 
-    <!-- Controls -->
-    <div class="controls">
-      <div class="field">
-        <label for="textSelect">Vedic Text</label>
-        <select id="textSelect"></select>
+    <!-- Controls + Toggle (left aligned) -->
+    <div class="controlsWrap">
+
+      <div class="controlsRow">
+        <!-- No "Vedic Text" label -->
+        <div class="field">
+          <select id="textSelect" aria-label="Vedic Text"></select>
+        </div>
+
+        <!-- Date label becomes Podcast -->
+        <div class="field">
+          <label for="dateSelect">Podcast</label>
+          <select id="dateSelect"></select>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="dateSelect">Date</label>
-        <select id="dateSelect"></select>
+      <!-- Toggle moved to next line -->
+      <div class="toggleRow">
+        <div class="toggle">
+          <button id="btnTranscription" class="active" type="button">Transcription</button>
+          <button id="btnSummary" type="button">Podcast Summary</button>
+        </div>
+        <div class="toggleHint">
+          Tip: Use the toggle to switch between word-by-word/sentence explanation and a short summary.
+        </div>
       </div>
 
-      <div class="toggle">
-        <button id="btnTranscription" class="active" type="button">Transcription</button>
-        <button id="btnSummary" type="button">Podcast Summary</button>
+      <!-- Status aligned left -->
+      <div class="statusRow">
+        <div class="statusPill" id="statusMsg">Ready.</div>
       </div>
     </div>
 
-    <!-- Status -->
-    <div class="statusRow">
-      <div class="statusPill" id="statusMsg">Ready.</div>
-    </div>
-
-    <!-- AUDIO PLAYER (right below controls) -->
+    <!-- AUDIO PLAYER -->
     <div class="card">
       <h2 class="episodeTitle" id="episodeTitle">Select an episode</h2>
       <p class="episodeMeta" id="episodeMeta"></p>
-
       <video id="audioPlayer" controls playsinline preload="metadata"></video>
-
       <div class="error" id="audioError" style="display:none;"></div>
     </div>
 
-    <!-- Transcription / Summary (below audio) -->
+    <!-- Transcription / Summary -->
     <div class="card">
       <div class="docHeader">
         <h3 id="docTitle">Transcription</h3>
       </div>
 
-      <div class="docBody" id="docBody">
-        Loading…
-      </div>
-
+      <div class="docBody" id="docBody">Loading…</div>
       <div class="error" id="docError" style="display:none;"></div>
     </div>
 
