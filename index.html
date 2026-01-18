@@ -22,10 +22,10 @@
       --shadow: 0 18px 60px rgba(0,0,0,0.48);
       --radius: 18px;
 
-      /* Toggle colors (obvious) */
-      --toggleOuter: rgba(255, 213, 79, 0.28);   /* yellow */
+      /* Toggle colors */
+      --toggleOuter: rgba(255, 213, 79, 0.28);
       --toggleOuterBorder: rgba(255, 213, 79, 0.55);
-      --toggleActive: rgba(168, 85, 247, 0.55);  /* purple */
+      --toggleActive: rgba(168, 85, 247, 0.55);
       --toggleActiveBorder: rgba(210, 170, 255, 0.70);
     }
 
@@ -33,7 +33,7 @@
 
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color: var(--text);
       background:
         radial-gradient(1100px 700px at 20% 10%, rgba(155,231,255,0.18), transparent 58%),
@@ -57,10 +57,7 @@
     .bannerFrame{
       width: 100%;
       border-radius: 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
       overflow:hidden;
-      background: rgba(255,255,255,0.03);
     }
     .bannerFrame img{
       width: 100%;
@@ -69,13 +66,12 @@
       display:block;
     }
 
-    /* Controls layout */
+    /* Controls */
     .controlsWrap{
       display:flex;
       flex-direction:column;
-      align-items:flex-start;
       gap:12px;
-      margin: 8px 0 8px;
+      margin: 10px 0 14px;
     }
 
     .controlsRow{
@@ -112,20 +108,17 @@
       border-radius: 14px;
       padding: 10px 12px;
       font-size: 14px;
-      min-width: 270px;
+      min-width: 360px;
     }
     select option{ background:#0b1020; }
 
-    /* Toggle row: center of page */
+    /* Toggle (centered, obvious) */
     .toggleRow{
-      width: 100%;
       display:flex;
-      justify-content:center;   /* CENTER */
-      align-items:center;
-      margin-top: 2px;
+      justify-content:center;
+      margin-top: 6px;
     }
 
-    /* Very obvious toggle styling */
     .toggle{
       display:flex;
       gap:6px;
@@ -141,37 +134,27 @@
       padding: 12px 18px;
       border-radius: 999px;
       background: rgba(0,0,0,0.25);
-      color: rgba(255,255,255,0.90);
+      color: rgba(255,255,255,0.9);
       cursor:pointer;
       font-size: 14px;
-      letter-spacing: 0.3px;
-      transition: transform 0.08s ease, filter 0.08s ease;
-    }
-    .toggle button:hover{
-      filter: brightness(1.08);
-      transform: translateY(-1px);
     }
     .toggle button.active{
       background: var(--toggleActive);
-      color: rgba(255,255,255,0.98);
       box-shadow: inset 0 0 0 2px var(--toggleActiveBorder);
     }
 
-    /* Status line (left) */
+    /* Status */
     .statusRow{
-      display:flex;
-      justify-content:flex-start;
-      margin: 2px 0 12px;
-      width:100%;
+      margin-top: 4px;
     }
     .statusPill{
+      display:inline-block;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 999px;
-      padding: 8px 12px;
+      padding: 6px 12px;
+      font-size: 12px;
       color: var(--muted);
-      font-size: 12.5px;
-      max-width: 100%;
     }
 
     /* Cards */
@@ -185,7 +168,6 @@
       margin-bottom: 16px;
     }
 
-    /* Audio section */
     .episodeTitle{
       margin:0 0 6px;
       font-size: 18px;
@@ -194,28 +176,16 @@
       margin:0 0 12px;
       font-size: 13.5px;
       color: var(--muted);
-      line-height: 1.35;
     }
 
-    /* Use <video> for MP4 reliability but looks like audio */
-    #audioPlayer{
+    video{
       width:100%;
-      height: 56px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.05);
-      outline: none;
+      height:56px;
+      border-radius:14px;
     }
 
-    /* Document */
-    .docHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom: 10px;
-      gap: 10px;
-    }
     .docHeader h3{
-      margin:0;
+      margin:0 0 10px;
       font-size: 16px;
     }
 
@@ -228,26 +198,8 @@
       overflow:auto;
     }
 
-    .docBody p{ margin:0 0 10px; line-height:1.6; color: rgba(255,255,255,0.88); }
-    .docBody h1, .docBody h2, .docBody h3{ margin: 14px 0 10px; }
-    .docBody ul{ margin: 8px 0 12px 20px; }
-    .docBody li{ margin: 4px 0; color: rgba(255,255,255,0.86); }
-    .docBody blockquote{
-      margin: 10px 0;
-      padding: 10px 12px;
-      border-left: 3px solid rgba(155,231,255,0.35);
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-    }
+    .docBody p{ margin:0 0 10px; line-height:1.6; }
 
-    .error{
-      color: rgba(255,160,160,0.95);
-      font-size: 13px;
-      margin-top: 8px;
-      white-space: pre-wrap;
-    }
-
-    /* Footer */
     .footer{
       margin-top: 28px;
       padding-top: 14px;
@@ -257,22 +209,9 @@
       color: rgba(255,255,255,0.65);
     }
 
-    /* Mobile fixes */
-    @media (max-width: 640px){
-      .wrap{ padding: 12px 12px 40px; }
-      .bannerFrame{
-        border: none;
-        box-shadow: none;
-        border-radius: 12px;
-        background: transparent;
-      }
-      .bannerFrame img{
-        height: 140px;
-        object-fit: cover;
-        border-radius: 12px;
-      }
-      select{ min-width: 240px; }
-      .toggle button{ padding: 12px 14px; }
+    @media (max-width:640px){
+      .bannerFrame img{ height:140px; }
+      select{ min-width:260px; }
     }
   </style>
 </head>
@@ -283,71 +222,58 @@
     <!-- Banner -->
     <div class="banner">
       <div class="bannerFrame">
-        <img src="Vedic_podcast_banner_2.png" alt="Veda Padārtha Anvaya Podcasts">
+        <img src="Vedic_podcast_banner_2.PNG" alt="Veda Padārtha Anvaya Podcasts">
       </div>
     </div>
 
-    <!-- Controls + Toggle -->
+    <!-- Controls -->
     <div class="controlsWrap">
 
+      <!-- Podcast dropdown ONLY -->
       <div class="controlsRow">
-        <!-- Vedic text dropdown (no label) -->
-        <div class="field">
-          <select id="textSelect" aria-label="Vedic Text"></select>
-        </div>
-
-        <!-- Podcast dropdown -->
         <div class="field">
           <label for="dateSelect">Podcast</label>
           <select id="dateSelect"></select>
         </div>
       </div>
 
-      <!-- Toggle centered, no tip line -->
+      <!-- Toggle -->
       <div class="toggleRow">
-        <div class="toggle" aria-label="Toggle Transcription or Summary">
+        <div class="toggle">
           <button id="btnTranscription" class="active" type="button">Transcription</button>
           <button id="btnSummary" type="button">Podcast Summary</button>
         </div>
       </div>
 
-      <!-- Status aligned left -->
+      <!-- Status -->
       <div class="statusRow">
         <div class="statusPill" id="statusMsg">Ready.</div>
       </div>
     </div>
 
-    <!-- AUDIO PLAYER (no autoplay messaging below it) -->
+    <!-- Audio -->
     <div class="card">
       <h2 class="episodeTitle" id="episodeTitle">Select an episode</h2>
       <p class="episodeMeta" id="episodeMeta"></p>
-
-      <!-- No autoplay attribute. User clicks play each time -->
       <video id="audioPlayer" controls playsinline preload="metadata"></video>
-
-      <!-- Keep only real errors (like 404) -->
       <div class="error" id="audioError" style="display:none;"></div>
     </div>
 
-    <!-- Transcription / Summary -->
+    <!-- Text -->
     <div class="card">
       <div class="docHeader">
         <h3 id="docTitle">Transcription</h3>
       </div>
-
       <div class="docBody" id="docBody">Loading…</div>
       <div class="error" id="docError" style="display:none;"></div>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <div>
-        <strong>Acknowledgements:</strong>
-        Shri Ram kumar Vaidyanathan, Portland, OR, USA
-      </div>
+      <div><strong>Acknowledgements:</strong> Shri Ram kumar Vaidyanathan, Portland, OR, USA</div>
       <div style="margin-top:4px;">
         <strong>Contact:</strong>
-        <a href="mailto:ramk21@gmail.com" style="color:inherit; text-decoration:underline;">
+        <a href="mailto:ramk21@gmail.com" style="color:inherit;text-decoration:underline;">
           ramk21@gmail.com
         </a>
       </div>
