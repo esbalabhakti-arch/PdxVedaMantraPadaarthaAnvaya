@@ -40,7 +40,7 @@
       padding: 18px 16px 50px;
     }
 
-    /* Banner: full-width page banner, cropped proportionally */
+    /* Banner: full-width page banner */
     .banner{
       display:flex;
       justify-content:center;
@@ -56,8 +56,8 @@
     }
     .bannerFrame img{
       width: 100%;
-      height: 220px;         /* banner height */
-      object-fit: cover;     /* crop to fill width, keeps proportions */
+      height: 220px;      /* thin-ish banner */
+      object-fit: cover;  /* fills width nicely */
       display:block;
     }
 
@@ -130,7 +130,7 @@
     .statusRow{
       display:flex;
       justify-content:flex-end;
-      margin: 0 0 14px;
+      margin: 0 0 12px;
     }
     .statusPill{
       background: rgba(255,255,255,0.05);
@@ -153,6 +153,27 @@
       margin-bottom: 16px;
     }
 
+    /* Audio section */
+    .episodeTitle{
+      margin:0 0 6px;
+      font-size: 18px;
+    }
+    .episodeMeta{
+      margin:0 0 12px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    /* Use <video> for MP4 reliability but make it look like an audio player */
+    #audioPlayer{
+      width:100%;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      outline: none;
+    }
+
     /* Document */
     .docHeader{
       display:flex;
@@ -164,16 +185,6 @@
     .docHeader h3{
       margin:0;
       font-size: 16px;
-    }
-    .docHeader a{
-      font-size: 13px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      color: inherit;
-      text-decoration:none;
-      white-space: nowrap;
     }
 
     .docBody{
@@ -196,27 +207,6 @@
       border-left: 3px solid rgba(155,231,255,0.35);
       background: rgba(255,255,255,0.05);
       border-radius: 12px;
-    }
-
-    /* Audio section */
-    .episodeTitle{
-      margin:0 0 6px;
-      font-size: 18px;
-    }
-    .episodeMeta{
-      margin:0 0 12px;
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
-
-    /* Use <video> for MP4 reliability but make it look like an audio player */
-    #audioPlayer{
-      width:100%;
-      height: 56px;       /* small bar */
-      border-radius: 14px;
-      background: rgba(255,255,255,0.05);
-      outline: none;
     }
 
     .error{
@@ -244,8 +234,8 @@
     <!-- Banner -->
     <div class="banner">
       <div class="bannerFrame">
-        <!-- Must exist in repo root with this exact filename -->
-        <img src="Vedam_Podcast_Page_Banner.png" alt="Veda Padārtha Anvaya Podcasts">
+        <!-- Your new banner file -->
+        <img src="Vedic_podcast_banner_2.PNG" alt="Veda Padārtha Anvaya Podcasts">
       </div>
     </div>
 
@@ -267,32 +257,32 @@
       </div>
     </div>
 
-    <!-- Status (script.js uses this) -->
+    <!-- Status -->
     <div class="statusRow">
       <div class="statusPill" id="statusMsg">Ready.</div>
     </div>
 
-    <!-- Transcription / Summary (main) -->
-    <div class="card">
-      <div class="docHeader">
-        <h3 id="docTitle">Transcription</h3>
-        <a id="docDownload" href="#" download>Download</a>
-      </div>
-      <div class="docBody" id="docBody">
-        Loading…
-      </div>
-      <div class="error" id="docError" style="display:none;"></div>
-    </div>
-
-    <!-- Audio (bottom) -->
+    <!-- AUDIO PLAYER (right below controls) -->
     <div class="card">
       <h2 class="episodeTitle" id="episodeTitle">Select an episode</h2>
       <p class="episodeMeta" id="episodeMeta"></p>
 
-      <!-- Use video for mp4 reliability -->
       <video id="audioPlayer" controls playsinline preload="metadata"></video>
 
       <div class="error" id="audioError" style="display:none;"></div>
+    </div>
+
+    <!-- Transcription / Summary (below audio) -->
+    <div class="card">
+      <div class="docHeader">
+        <h3 id="docTitle">Transcription</h3>
+      </div>
+
+      <div class="docBody" id="docBody">
+        Loading…
+      </div>
+
+      <div class="error" id="docError" style="display:none;"></div>
     </div>
 
     <!-- Footer -->
