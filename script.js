@@ -6,6 +6,9 @@
 //  - Images/<id>_summary.docx
 // ------------------------------
 
+// Bump this when you change the file so you can confirm the latest JS loaded:
+const BUILD_TAG = "2026-01-17_fix_dropdown_v2";
+
 const PODCAST_LIBRARY = [
   {
     text: "Aruna Prashnam",
@@ -13,23 +16,21 @@ const PODCAST_LIBRARY = [
       {
         id: "101_Intro_1",
         date: "2026-01-13",
-        title: "Introduction —  Aruṇa Prashnam overview - 1",
+        title: "Introduction — Aruṇa Prashnam overview - 1",
         audio: "Audio/101_Intro_1.mp4",
         transcriptionDocx: "Images/101_Intro_1_transcription.docx",
         summaryDocx: "Images/101_Intro_1_summary.docx",
-        note: "Background on Aruna Prashnam,Taittirīya Āraṇyaka structure."
+        note: "Background on Aruna Prashnam, Taittirīya Āraṇyaka structure."
       },
-      
       {
         id: "102_Intro_2",
         date: "2026-01-14",
-        title: "Introduction —  Aruṇa Prashnam overview - 2",
+        title: "Introduction — Aruṇa Prashnam overview - 2",
         audio: "Audio/102_Intro_2.mp4",
         transcriptionDocx: "Images/102_Intro_2_transcription.docx",
         summaryDocx: "Images/102_Intro_2_summary.docx",
-        note: " Aruna Prashnam Introduction 2"
+        note: "Aruna Prashnam Introduction 2"
       },
-            
       {
         id: "103_Panchadi_1",
         date: "2026-01-15",
@@ -49,7 +50,7 @@ const PODCAST_LIBRARY = [
 const $ = (id) => document.getElementById(id);
 
 const textSelect = $("textSelect");
-const dateSelect = $("dateSelect");
+const dateSelect = $("dateSelect"); // this is now your "Podcast" dropdown in the UI
 const btnTranscription = $("btnTranscription");
 const btnSummary = $("btnSummary");
 const statusMsg = $("statusMsg");
@@ -112,9 +113,9 @@ function findTextObj(textName) {
   return PODCAST_LIBRARY.find(t => t.text === textName) || null;
 }
 
-function findEpisodeByDate(textObj, dateValue) {
+function findEpisodeById(textObj, episodeId) {
   if (!textObj) return null;
-  return textObj.episodes.find(e => e.date === dateValue) || null;
+  return (textObj.episodes || []).find(e => e.id === episodeId) || null;
 }
 
 function stopAndResetPlayer() {
@@ -139,7 +140,7 @@ async function loadDocxToHtml(docxPath) {
   if (docBody) docBody.innerHTML = "Loading…";
 
   if (!window.mammoth) {
-    showError(docError, "mammoth.js did not load. Check your internet connection or script tag.");
+    showError(docError, "mammoth.js did not load. Check your internet connection or the script tag.");
     return;
   }
 
@@ -149,7 +150,7 @@ async function loadDocxToHtml(docxPath) {
       throw new Error(
         `Could not fetch: ${docxPath}\n` +
         `HTTP ${res.status} ${res.statusText}\n\n` +
-        `Check that the file exists in your repo and folder names match exactly (Audio vs audio, Images vs images).`
+        `Check: file exists + exact folder/file capitalization.`
       );
     }
 
@@ -246,6 +247,9 @@ function populatePodcastSelect(textObj) {
 
   const eps = (textObj?.episodes || []).slice().sort(sortByDateDesc);
 
+  // Debug: confirm episode count in UI status
+  setStatus(`Loaded: ${eps.length} podcasts • ${BUILD_TAG}`);
+
   if (!eps.length) {
     const opt = document.createElement("option");
     opt.value = "";
@@ -256,11 +260,13 @@ function populatePodcastSelect(textObj) {
 
   eps.forEach(ep => {
     const opt = document.createElement("option");
-    opt.value = ep.date;
-    // Make it easier when there are many episodes:
+    opt.value = ep.id; // IMPORTANT: use id as value (robust)
     opt.textContent = `${ep.date} — ${ep.title}`;
     dateSelect.appendChild(opt);
   });
+
+  // Select the newest (first in sorted list) by default
+  dateSelect.value = eps[0].id;
 }
 
 // ------------------------------
@@ -272,7 +278,7 @@ if (textSelect) {
     const textObj = findTextObj(currentText);
     populatePodcastSelect(textObj);
 
-    const ep = findEpisodeByDate(textObj, dateSelect?.value);
+    const ep = findEpisodeById(textObj, dateSelect?.value);
     if (ep) await loadEpisode(ep);
   });
 }
@@ -280,7 +286,7 @@ if (textSelect) {
 if (dateSelect) {
   dateSelect.addEventListener("change", async () => {
     const textObj = findTextObj(currentText);
-    const ep = findEpisodeByDate(textObj, dateSelect.value);
+    const ep = findEpisodeById(textObj, dateSelect.value);
     if (ep) await loadEpisode(ep);
   });
 }
@@ -317,7 +323,7 @@ if (btnSummary) {
 
   setToggle("transcription");
 
-  const ep = findEpisodeByDate(textObj, dateSelect?.value);
+  const ep = findEpisodeById(textObj, dateSelect?.value);
   if (ep) {
     loadEpisode(ep);
   } else {
