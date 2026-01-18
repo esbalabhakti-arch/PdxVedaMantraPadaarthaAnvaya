@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Padārtha & Anvaya Podcasts</title>
-  <meta name="description" content="Word-by-word (Padārtha) and sentence-level (Anvaya) meanings of Vedic mantras in clear English — via audio podcasts with transcription and summaries." />
+  <title>Veda Padārtha Anvaya Podcasts</title>
 
-  <!-- Docx -> HTML converter -->
+  <!-- DOCX → HTML converter -->
   <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
 
   <style>
@@ -14,59 +13,55 @@
       --bg1:#070914;
       --bg2:#0b1020;
       --card: rgba(255,255,255,0.07);
-      --card2: rgba(255,255,255,0.09);
       --border: rgba(255,255,255,0.14);
       --text: rgba(255,255,255,0.92);
       --muted: rgba(255,255,255,0.70);
       --shadow: 0 18px 60px rgba(0,0,0,0.48);
       --radius: 18px;
-      --accent: rgba(155,231,255,0.16);
+      --accent: rgba(155,231,255,0.18);
     }
 
     *{ box-sizing:border-box; }
+
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color: var(--text);
       background:
         radial-gradient(1100px 700px at 20% 10%, rgba(155,231,255,0.18), transparent 58%),
-        radial-gradient(1100px 700px at 85% 15%, rgba(185,255,218,0.12), transparent 58%),
-        radial-gradient(900px 600px at 55% 90%, rgba(140,120,255,0.10), transparent 58%),
+        radial-gradient(900px 600px at 80% 90%, rgba(140,120,255,0.10), transparent 58%),
         linear-gradient(180deg, var(--bg1), var(--bg2) 45%, var(--bg1));
       min-height:100vh;
     }
 
-    .wrap{ max-width: 1150px; margin: 0 auto; padding: 26px 16px 50px; }
+    .wrap{
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 20px 16px 50px;
+    }
 
     /* Banner */
     .banner{
       display:flex;
       justify-content:center;
-      margin: 6px 0 18px;
+      margin-bottom: 8px;
     }
     .banner img{
-      width: min(100%, 980px);
-      border-radius: 18px;
+      width: min(100%, 720px);
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      display:block;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
     }
 
     /* Controls row */
     .controls{
       display:flex;
       flex-wrap:wrap;
+      justify-content:flex-end;
       gap:12px;
-      align-items:flex-end;
-      justify-content:space-between;
-      margin-bottom: 14px;
-    }
-
-    .leftControls{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      align-items:flex-end;
+      margin-bottom: 16px;
     }
 
     .field{
@@ -77,14 +72,15 @@
       display:flex;
       gap:10px;
       align-items:center;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.25);
-      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
     }
+
     .field label{
       font-size: 12px;
       color: var(--muted);
       white-space: nowrap;
     }
+
     select{
       appearance:none;
       border: 1px solid rgba(255,255,255,0.12);
@@ -92,16 +88,15 @@
       color: var(--text);
       border-radius: 14px;
       padding: 10px 12px;
-      outline:none;
       font-size: 14px;
       min-width: 210px;
     }
-    select option{ background: #0b1020; }
+    select option{ background:#0b1020; }
 
     /* Toggle */
     .toggle{
       display:flex;
-      gap:8px;
+      gap:6px;
       padding: 6px;
       border-radius: 999px;
       background: rgba(255,255,255,0.05);
@@ -109,34 +104,20 @@
     }
     .toggle button{
       border:0;
-      padding: 10px 12px;
+      padding: 9px 14px;
       border-radius: 999px;
       background: transparent;
       color: var(--muted);
       cursor:pointer;
       font-size: 13px;
-      transition: 160ms ease;
-      user-select:none;
     }
     .toggle button.active{
       background: var(--accent);
       color: var(--text);
-      box-shadow: inset 0 0 0 1px rgba(155,231,255,0.22);
+      box-shadow: inset 0 0 0 1px rgba(155,231,255,0.25);
     }
 
-    .status{
-      color: var(--muted);
-      font-size: 13px;
-      padding: 0 4px 2px;
-    }
-
-    /* Main content cards */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-
+    /* Cards */
     .card{
       background: var(--card);
       border: 1px solid var(--border);
@@ -144,30 +125,14 @@
       padding: 16px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
+      margin-bottom: 16px;
     }
 
-    .episodeTitle{
-      margin:0 0 6px;
-      font-size: 18px;
-      letter-spacing: 0.2px;
-    }
-    .episodeMeta{
-      margin:0 0 12px;
-      color: var(--muted);
-      font-size: 13.5px;
-      line-height: 1.35;
-    }
-
-    audio{
-      width:100%;
-      margin-top: 6px;
-    }
-
+    /* Document */
     .docHeader{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap:10px;
       margin-bottom: 10px;
     }
     .docHeader h3{
@@ -175,44 +140,37 @@
       font-size: 16px;
     }
     .docHeader a{
-      color: var(--text);
       font-size: 13px;
-      opacity: 0.9;
       padding: 8px 10px;
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.14);
       background: rgba(255,255,255,0.06);
+      color: inherit;
       text-decoration:none;
     }
-    .docHeader a:hover{ background: rgba(255,255,255,0.10); }
 
     .docBody{
       background: rgba(0,0,0,0.22);
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 14px;
       padding: 14px;
-      overflow:auto;
       max-height: 55vh;
+      overflow:auto;
     }
+    .docBody p{ margin:0 0 10px; line-height:1.55; }
 
-    /* Styling for converted docx HTML */
-    .docBody p{ margin: 0 0 10px; line-height: 1.55; color: rgba(255,255,255,0.88); }
-    .docBody h1, .docBody h2, .docBody h3{ margin: 14px 0 10px; }
-    .docBody ul{ margin: 8px 0 12px 20px; }
-    .docBody li{ margin: 4px 0; color: rgba(255,255,255,0.86); }
-    .docBody blockquote{
-      margin: 10px 0;
-      padding: 10px 12px;
-      border-left: 3px solid rgba(155,231,255,0.35);
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
+    /* Audio */
+    .episodeTitle{
+      margin:0 0 6px;
+      font-size: 18px;
     }
-
-    .footer{
-      margin-top: 18px;
-      text-align:center;
-      font-size: 12px;
-      color: rgba(255,255,255,0.55);
+    .episodeMeta{
+      margin:0 0 12px;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+    audio{
+      width:100%;
     }
 
     .error{
@@ -221,64 +179,79 @@
       margin-top: 8px;
       white-space: pre-wrap;
     }
+
+    /* Footer */
+    .footer{
+      margin-top: 28px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      text-align:center;
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.65);
+    }
   </style>
 </head>
 
 <body>
   <div class="wrap">
 
-    <!-- Top Banner -->
+    <!-- Banner -->
     <div class="banner">
-      <!-- Put your banner png in repo root with this exact name -->
-      <img src="Vedam_Podcast_Page_Banner.png" alt="Vedam Podcast Banner">
+      <img src="Vedam_Podcast_Page_Banner.png" alt="Veda Padartha Anvaya Podcasts">
     </div>
 
     <!-- Controls -->
     <div class="controls">
-      <div class="leftControls">
-        <div class="field">
-          <label for="textSelect">Vedic Text</label>
-          <select id="textSelect"></select>
-        </div>
-
-        <div class="field">
-          <label for="dateSelect">Date</label>
-          <select id="dateSelect"></select>
-        </div>
-
-        <div class="toggle" aria-label="Choose view">
-          <button id="btnTranscription" class="active" type="button">Transcription</button>
-          <button id="btnSummary" type="button">Podcast Summary</button>
-        </div>
+      <div class="field">
+        <label for="textSelect">Vedic Text</label>
+        <select id="textSelect"></select>
       </div>
 
-      <div class="status" id="statusMsg">Ready.</div>
-    </div>
-
-    <!-- Main -->
-    <div class="grid">
-      <div class="card">
-        <h2 class="episodeTitle" id="episodeTitle">Select an episode</h2>
-        <p class="episodeMeta" id="episodeMeta">Choose a Vedic text and date to begin.</p>
-        <audio id="audioPlayer" controls preload="metadata"></audio>
-        <div class="error" id="audioError" style="display:none;"></div>
+      <div class="field">
+        <label for="dateSelect">Date</label>
+        <select id="dateSelect"></select>
       </div>
 
-      <div class="card">
-        <div class="docHeader">
-          <h3 id="docTitle">Transcription</h3>
-          <a id="docDownload" href="#" download>Download</a>
-        </div>
-        <div class="docBody" id="docBody">
-          Select an episode to load transcription/summary.
-        </div>
-        <div class="error" id="docError" style="display:none;"></div>
+      <div class="toggle">
+        <button id="btnTranscription" class="active" type="button">Transcription</button>
+        <button id="btnSummary" type="button">Podcast Summary</button>
       </div>
     </div>
 
+    <!-- Transcription / Summary -->
+    <div class="card">
+      <div class="docHeader">
+        <h3 id="docTitle">Transcription</h3>
+        <a id="docDownload" href="#" download>Download</a>
+      </div>
+      <div class="docBody" id="docBody">
+        Select an episode to load transcription or summary.
+      </div>
+      <div class="error" id="docError" style="display:none;"></div>
+    </div>
+
+    <!-- Audio (bottom) -->
+    <div class="card">
+      <h2 class="episodeTitle" id="episodeTitle">Select an episode</h2>
+      <p class="episodeMeta" id="episodeMeta"></p>
+      <audio id="audioPlayer" controls preload="metadata"></audio>
+      <div class="error" id="audioError" style="display:none;"></div>
+    </div>
+
+    <!-- Footer -->
     <div class="footer">
-      Built for Padārtha (word-by-word) & Anvaya (sentence meaning) learning • Hosted on GitHub Pages
+      <div>
+        <strong>Acknowledgements:</strong>
+        Shri Ram Kumar Vaidyanathan, Portland, OR, USA
+      </div>
+      <div style="margin-top:4px;">
+        <strong>Contact:</strong>
+        <a href="mailto:ramk21@gmail.com" style="color:inherit; text-decoration:underline;">
+          ramk21@gmail.com
+        </a>
+      </div>
     </div>
+
   </div>
 
   <script src="script.js"></script>
