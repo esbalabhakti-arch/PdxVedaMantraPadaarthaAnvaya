@@ -1,9 +1,9 @@
 // ------------------------------
 // CONFIG: Update only this section when you add new episodes
-// Folder structure expected:
-//  - Audio/<yourfile>.mp4
-//  - Images/<yourfile>_transcription.docx
-//  - Images/<yourfile>_summary.docx
+// Folder structure expected (case-sensitive on GitHub Pages):
+//  - Audio/<id>.mp4
+//  - Images/<id>_transcription.docx
+//  - Images/<id>_summary.docx
 // Banner expected in repo root:
 //  - Vedam_Podcast_Page_Banner.png
 // ------------------------------
@@ -13,7 +13,6 @@ const PODCAST_LIBRARY = [
     text: "Aruna Prashnam",
     episodes: [
       {
-        // Use a stable "id" for internal reference
         id: "101_Intro_1",
         date: "2026-01-17",
         title: "Intro — Taittirīya Āraṇyaka & Aruṇam overview",
@@ -24,35 +23,29 @@ const PODCAST_LIBRARY = [
       }
     ]
   }
-
-  // Add more Vedic texts like this:
-  // {
-  //   text: "Mahānyāsam",
-  //   episodes: [
-  //     { id:"...", date:"2026-01-24", title:"...", audio:"Audio/....mp4", transcriptionDocx:"Images/..._transcription.docx", summaryDocx:"Images/..._summary.docx", note:"..." }
-  //   ]
-  // }
 ];
 
 // ------------------------------
-// UI Elements
+// UI Elements (safe getters)
 // ------------------------------
-const textSelect = document.getElementById("textSelect");
-const dateSelect = document.getElementById("dateSelect");
-const btnTranscription = document.getElementById("btnTranscription");
-const btnSummary = document.getElementById("btnSummary");
-const statusMsg = document.getElementById("statusMsg");
+const $ = (id) => document.getElementById(id);
 
-const episodeTitle = document.getElementById("episodeTitle");
-const episodeMeta = document.getElementById("episodeMeta");
+const textSelect = $("textSelect");
+const dateSelect = $("dateSelect");
+const btnTranscription = $("btnTranscription");
+const btnSummary = $("btnSummary");
+const statusMsg = $("statusMsg");
 
-const audioPlayer = document.getElementById("audioPlayer");
-const audioError = document.getElementById("audioError");
+const episodeTitle = $("episodeTitle");
+const episodeMeta = $("episodeMeta");
 
-const docTitle = document.getElementById("docTitle");
-const docBody = document.getElementById("docBody");
-const docDownload = document.getElementById("docDownload");
-const docError = document.getElementById("docError");
+const audioPlayer = $("audioPlayer");
+const audioError = $("audioError");
+
+const docTitle = $("docTitle");
+const docBody = $("docBody");
+const docDownload = $("docDownload");
+const docError = $("docError");
 
 // State
 let currentMode = "transcription"; // "transcription" | "summary"
@@ -63,40 +56,46 @@ let currentEpisode = null;
 // Helpers
 // ------------------------------
 function setStatus(msg) {
-  statusMsg.textContent = msg;
+  if (statusMsg) statusMsg.textContent = msg;
 }
 
 function showError(el, msg) {
+  if (!el) return;
   el.style.display = "block";
   el.textContent = msg;
 }
 
 function clearError(el) {
+  if (!el) return;
   el.style.display = "none";
   el.textContent = "";
 }
 
 function clearDoc() {
-  docBody.innerHTML = "Select an episode to load transcription/summary.";
-  docDownload.href = "#";
-  docDownload.removeAttribute("download");
+  if (docBody) docBody.innerHTML = "Select an episode to load transcription or summary.";
+  if (docDownload) {
+    docDownload.href = "#";
+    docDownload.removeAttribute("download");
+  }
 }
 
 function setToggle(mode) {
   currentMode = mode;
-  if (mode === "transcription") {
-    btnTranscription.classList.add("active");
-    btnSummary.classList.remove("active");
-    docTitle.textContent = "Transcription";
-  } else {
-    btnSummary.classList.add("active");
-    btnTranscription.classList.remove("active");
-    docTitle.textContent = "Podcast Summary";
+
+  if (btnTranscription && btnSummary) {
+    if (mode === "transcription") {
+      btnTranscription.classList.add("active");
+      btnSummary.classList.remove("active");
+      if (docTitle) docTitle.textContent = "Transcription";
+    } else {
+      btnSummary.classList.add("active");
+      btnTranscription.classList.remove("active");
+      if (docTitle) docTitle.textContent = "Podcast Summary";
+    }
   }
 }
 
 function sortByDateDesc(a, b) {
-  // Expect YYYY-MM-DD
   return (a.date < b.date) ? 1 : (a.date > b.date) ? -1 : 0;
 }
 
@@ -109,11 +108,19 @@ function findEpisodeByDate(textObj, dateValue) {
   return textObj.episodes.find(e => e.date === dateValue) || null;
 }
 
-function stopAndResetAudio() {
+function stopAndResetPlayer() {
+  if (!audioPlayer) return;
   try {
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
   } catch (_) {}
+}
+
+function setPlayerSource(src) {
+  if (!audioPlayer) return;
+  // For <video>, setting src directly is fine.
+  audioPlayer.src = src;
+  audioPlayer.load();
 }
 
 // ------------------------------
@@ -121,32 +128,36 @@ function stopAndResetAudio() {
 // ------------------------------
 async function loadDocxToHtml(docxPath) {
   clearError(docError);
-  docBody.innerHTML = "Loading…";
+  if (docBody) docBody.innerHTML = "Loading…";
+
+  // Mammoth must exist
+  if (!window.mammoth) {
+    clearDoc();
+    showError(docError, "mammoth.js did not load. Check your internet connection or script tag.");
+    return;
+  }
 
   try {
     const res = await fetch(docxPath, { cache: "no-cache" });
     if (!res.ok) {
-      throw new Error(`Could not fetch file: ${docxPath}\nHTTP ${res.status} ${res.statusText}`);
+      throw new Error(
+        `Could not fetch: ${docxPath}\n` +
+        `HTTP ${res.status} ${res.statusText}\n\n` +
+        `Check that the file exists in your repo and the folder names match exactly (Audio vs audio, Images vs images).`
+      );
     }
 
     const arrayBuffer = await res.arrayBuffer();
 
-    // Convert docx to HTML
     const result = await mammoth.convertToHtml({ arrayBuffer });
-    const html = result.value || "";
-    const messages = result.messages || [];
+    const html = (result.value || "").trim();
 
-    docBody.innerHTML = html.trim() ? html : "<p>(No content found in document.)</p>";
+    if (docBody) docBody.innerHTML = html ? html : "<p>(No content found in document.)</p>";
 
-    if (messages.length) {
-      // Non-fatal warnings
-      console.log("Mammoth messages:", messages);
+    if (docDownload) {
+      docDownload.href = docxPath;
+      docDownload.setAttribute("download", docxPath.split("/").pop());
     }
-
-    // Allow download link
-    docDownload.href = docxPath;
-    docDownload.setAttribute("download", docxPath.split("/").pop());
-
   } catch (err) {
     clearDoc();
     showError(docError, String(err));
@@ -163,52 +174,68 @@ async function loadEpisode(ep) {
   clearError(audioError);
   clearError(docError);
 
-  episodeTitle.textContent = ep.title || "Selected episode";
-  episodeMeta.textContent = `${currentText} • ${ep.date}${ep.note ? " • " + ep.note : ""}`;
+  if (episodeTitle) episodeTitle.textContent = ep.title || "Selected episode";
+  if (episodeMeta) {
+    episodeMeta.textContent = `${currentText} • ${ep.date}${ep.note ? " • " + ep.note : ""}`;
+  }
 
-  // Load audio
+  // Load document first (so user sees content even if autoplay blocked)
+  if (currentMode === "transcription") {
+    setStatus("Loading transcription…");
+    await loadDocxToHtml(ep.transcriptionDocx);
+  } else {
+    setStatus("Loading summary…");
+    await loadDocxToHtml(ep.summaryDocx);
+  }
+
+  // Load player (MP4-friendly)
   setStatus("Loading audio…");
-  stopAndResetAudio();
-  audioPlayer.src = ep.audio;
-  audioPlayer.load();
+  stopAndResetPlayer();
+  setPlayerSource(ep.audio);
 
-  // Autoplay when metadata ready
+  // Autoplay attempt
   const tryAutoplay = async () => {
+    if (!audioPlayer) return;
     try {
       await audioPlayer.play();
       setStatus("Playing.");
     } catch (e) {
-      // Autoplay may be blocked in some browsers until user interacts once
       setStatus("Ready (autoplay may be blocked until you press Play once).");
-      showError(audioError, "Autoplay was blocked by your browser. Click Play once, then future selections will autoplay.");
+      showError(
+        audioError,
+        "Autoplay was blocked by your browser.\nClick Play once, then future selections will usually autoplay."
+      );
     }
   };
 
-  // Attempt autoplay when can play
-  audioPlayer.oncanplay = () => { tryAutoplay(); };
+  // When media is ready, try autoplay
+  if (audioPlayer) {
+    audioPlayer.oncanplay = () => { tryAutoplay(); };
 
-  audioPlayer.onerror = () => {
-    setStatus("Audio failed to load.");
-    showError(audioError, `Audio failed to load: ${ep.audio}\nCheck the file path and that it is committed to GitHub.`);
-  };
-
-  // Load document based on mode
-  if (currentMode === "transcription") {
-    setStatus("Loading transcription…");
-    await loadDocxToHtml(ep.transcriptionDocx);
-    setStatus("Ready.");
-  } else {
-    setStatus("Loading summary…");
-    await loadDocxToHtml(ep.summaryDocx);
-    setStatus("Ready.");
+    audioPlayer.onerror = () => {
+      setStatus("Audio failed to load.");
+      showError(
+        audioError,
+        `Audio failed to load: ${ep.audio}\n\n` +
+        `Common causes:\n` +
+        `1) File path mismatch (case-sensitive)\n` +
+        `2) File not committed/pushed to GitHub\n` +
+        `3) Browser can't decode the MP4 codec\n\n` +
+        `Try: converting to MP3 for maximum compatibility.`
+      );
+    };
   }
+
+  setStatus("Ready.");
 }
 
 // ------------------------------
 // UI population
 // ------------------------------
 function populateTextSelect() {
+  if (!textSelect) return;
   textSelect.innerHTML = "";
+
   PODCAST_LIBRARY.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t.text;
@@ -218,76 +245,88 @@ function populateTextSelect() {
 }
 
 function populateDateSelect(textObj) {
+  if (!dateSelect) return;
   dateSelect.innerHTML = "";
 
-  const episodes = (textObj?.episodes || []).slice().sort(sortByDateDesc);
+  const eps = (textObj?.episodes || []).slice().sort(sortByDateDesc);
 
-  episodes.forEach(ep => {
+  if (!eps.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "(No episodes yet)";
+    dateSelect.appendChild(opt);
+    return;
+  }
+
+  eps.forEach(ep => {
     const opt = document.createElement("option");
     opt.value = ep.date;
     opt.textContent = ep.date;
     dateSelect.appendChild(opt);
   });
-
-  // If no episodes
-  if (!episodes.length) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "(No episodes yet)";
-    dateSelect.appendChild(opt);
-  }
 }
 
 // ------------------------------
 // Event handlers
 // ------------------------------
-textSelect.addEventListener("change", async () => {
-  currentText = textSelect.value;
-  const textObj = findTextObj(currentText);
-  populateDateSelect(textObj);
+if (textSelect) {
+  textSelect.addEventListener("change", async () => {
+    currentText = textSelect.value;
+    const textObj = findTextObj(currentText);
+    populateDateSelect(textObj);
 
-  const firstDate = dateSelect.value;
-  const ep = findEpisodeByDate(textObj, firstDate);
+    const ep = findEpisodeByDate(textObj, dateSelect?.value);
+    clearDoc();
+    if (ep) await loadEpisode(ep);
+  });
+}
 
-  clearDoc();
-  if (ep) await loadEpisode(ep);
-});
+if (dateSelect) {
+  dateSelect.addEventListener("change", async () => {
+    const textObj = findTextObj(currentText);
+    const ep = findEpisodeByDate(textObj, dateSelect.value);
+    clearDoc();
+    if (ep) await loadEpisode(ep);
+  });
+}
 
-dateSelect.addEventListener("change", async () => {
-  const textObj = findTextObj(currentText);
-  const ep = findEpisodeByDate(textObj, dateSelect.value);
-  clearDoc();
-  if (ep) await loadEpisode(ep);
-});
+if (btnTranscription) {
+  btnTranscription.addEventListener("click", async () => {
+    setToggle("transcription");
+    if (currentEpisode) await loadEpisode(currentEpisode);
+  });
+}
 
-btnTranscription.addEventListener("click", async () => {
-  setToggle("transcription");
-  if (currentEpisode) await loadEpisode(currentEpisode);
-});
-
-btnSummary.addEventListener("click", async () => {
-  setToggle("summary");
-  if (currentEpisode) await loadEpisode(currentEpisode);
-});
+if (btnSummary) {
+  btnSummary.addEventListener("click", async () => {
+    setToggle("summary");
+    if (currentEpisode) await loadEpisode(currentEpisode);
+  });
+}
 
 // ------------------------------
 // Initial load
 // ------------------------------
 (function init() {
+  setStatus("Initializing…");
+
   populateTextSelect();
 
-  // Default to first Vedic text
-  currentText = textSelect.value || (PODCAST_LIBRARY[0] && PODCAST_LIBRARY[0].text) || null;
+  currentText =
+    (textSelect && textSelect.value) ||
+    (PODCAST_LIBRARY[0] && PODCAST_LIBRARY[0].text) ||
+    null;
 
   const textObj = findTextObj(currentText);
   populateDateSelect(textObj);
 
   setToggle("transcription");
 
-  const ep = findEpisodeByDate(textObj, dateSelect.value);
+  const ep = findEpisodeByDate(textObj, dateSelect?.value);
   if (ep) {
     loadEpisode(ep);
   } else {
+    clearDoc();
     setStatus("Ready.");
   }
 })();
