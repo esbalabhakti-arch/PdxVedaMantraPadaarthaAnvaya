@@ -4,8 +4,6 @@
 //  - Audio/<id>.mp4
 //  - Images/<id>_transcription.docx
 //  - Images/<id>_summary.docx
-// Banner expected in repo root:
-//  - Vedam_Podcast_Page_Banner.png
 // ------------------------------
 
 const PODCAST_LIBRARY = [
@@ -44,7 +42,6 @@ const audioError = $("audioError");
 
 const docTitle = $("docTitle");
 const docBody = $("docBody");
-const docDownload = $("docDownload");
 const docError = $("docError");
 
 // State
@@ -69,14 +66,6 @@ function clearError(el) {
   if (!el) return;
   el.style.display = "none";
   el.textContent = "";
-}
-
-function clearDoc() {
-  if (docBody) docBody.innerHTML = "Select an episode to load transcription or summary.";
-  if (docDownload) {
-    docDownload.href = "#";
-    docDownload.removeAttribute("download");
-  }
 }
 
 function setToggle(mode) {
@@ -118,7 +107,6 @@ function stopAndResetPlayer() {
 
 function setPlayerSource(src) {
   if (!audioPlayer) return;
-  // For <video>, setting src directly is fine.
   audioPlayer.src = src;
   audioPlayer.load();
 }
@@ -130,9 +118,7 @@ async function loadDocxToHtml(docxPath) {
   clearError(docError);
   if (docBody) docBody.innerHTML = "Loading…";
 
-  // Mammoth must exist
   if (!window.mammoth) {
-    clearDoc();
     showError(docError, "mammoth.js did not load. Check your internet connection or script tag.");
     return;
   }
@@ -148,18 +134,11 @@ async function loadDocxToHtml(docxPath) {
     }
 
     const arrayBuffer = await res.arrayBuffer();
-
     const result = await mammoth.convertToHtml({ arrayBuffer });
+
     const html = (result.value || "").trim();
-
     if (docBody) docBody.innerHTML = html ? html : "<p>(No content found in document.)</p>";
-
-    if (docDownload) {
-      docDownload.href = docxPath;
-      docDownload.setAttribute("download", docxPath.split("/").pop());
-    }
   } catch (err) {
-    clearDoc();
     showError(docError, String(err));
   }
 }
@@ -179,28 +158,18 @@ async function loadEpisode(ep) {
     episodeMeta.textContent = `${currentText} • ${ep.date}${ep.note ? " • " + ep.note : ""}`;
   }
 
-  // Load document first (so user sees content even if autoplay blocked)
-  if (currentMode === "transcription") {
-    setStatus("Loading transcription…");
-    await loadDocxToHtml(ep.transcriptionDocx);
-  } else {
-    setStatus("Loading summary…");
-    await loadDocxToHtml(ep.summaryDocx);
-  }
-
-  // Load player (MP4-friendly)
+  // Load audio
   setStatus("Loading audio…");
   stopAndResetPlayer();
   setPlayerSource(ep.audio);
 
-  // Autoplay attempt
+  // Try autoplay once ready
   const tryAutoplay = async () => {
-    if (!audioPlayer) return;
     try {
       await audioPlayer.play();
       setStatus("Playing.");
-    } catch (e) {
-      setStatus("Ready (autoplay may be blocked until you press Play once).");
+    } catch {
+      setStatus("Ready (autoplay may be blocked; click Play once).");
       showError(
         audioError,
         "Autoplay was blocked by your browser.\nClick Play once, then future selections will usually autoplay."
@@ -208,7 +177,6 @@ async function loadEpisode(ep) {
     }
   };
 
-  // When media is ready, try autoplay
   if (audioPlayer) {
     audioPlayer.oncanplay = () => { tryAutoplay(); };
 
@@ -221,9 +189,18 @@ async function loadEpisode(ep) {
         `1) File path mismatch (case-sensitive)\n` +
         `2) File not committed/pushed to GitHub\n` +
         `3) Browser can't decode the MP4 codec\n\n` +
-        `Try: converting to MP3 for maximum compatibility.`
+        `Tip: MP3 is the most compatible format.`
       );
     };
+  }
+
+  // Load transcription/summary below audio
+  if (currentMode === "transcription") {
+    setStatus("Loading transcription…");
+    await loadDocxToHtml(ep.transcriptionDocx);
+  } else {
+    setStatus("Loading summary…");
+    await loadDocxToHtml(ep.summaryDocx);
   }
 
   setStatus("Ready.");
@@ -276,7 +253,6 @@ if (textSelect) {
     populateDateSelect(textObj);
 
     const ep = findEpisodeByDate(textObj, dateSelect?.value);
-    clearDoc();
     if (ep) await loadEpisode(ep);
   });
 }
@@ -285,7 +261,6 @@ if (dateSelect) {
   dateSelect.addEventListener("change", async () => {
     const textObj = findTextObj(currentText);
     const ep = findEpisodeByDate(textObj, dateSelect.value);
-    clearDoc();
     if (ep) await loadEpisode(ep);
   });
 }
@@ -326,7 +301,7 @@ if (btnSummary) {
   if (ep) {
     loadEpisode(ep);
   } else {
-    clearDoc();
+    if (docBody) docBody.innerHTML = "No episodes yet.";
     setStatus("Ready.");
   }
 })();
