@@ -19,7 +19,8 @@ const PODCAST_LIBRARY = [
         summaryDocx: "Images/101_Intro_1_summary.docx",
         note: "Background on Aruna Prashnam,Taittirīya Āraṇyaka structure."
       },
-            {
+      
+      {
         id: "102_Intro_2",
         date: "2026-01-14",
         title: "Introduction —  Aruṇa Prashnam overview - 2",
@@ -28,7 +29,8 @@ const PODCAST_LIBRARY = [
         summaryDocx: "Images/102_Intro_2_summary.docx",
         note: " Aruna Prashnam Introduction 2"
       },
-            {
+            
+      {
         id: "103_Panchadi_1",
         date: "2026-01-15",
         title: "Aruna Prashnam - Panchadi 1",
