@@ -12,12 +12,30 @@ const PODCAST_LIBRARY = [
     episodes: [
       {
         id: "101_Intro_1",
-        date: "2026-01-17",
-        title: "Intro — Taittirīya Āraṇyaka & Aruṇam overview",
+        date: "2026-01-13",
+        title: "Introduction —  Aruṇa Prashnam overview - 1",
         audio: "Audio/101_Intro_1.mp4",
         transcriptionDocx: "Images/101_Intro_1_transcription.docx",
         summaryDocx: "Images/101_Intro_1_summary.docx",
-        note: "Word-by-word + sentence meaning context; includes background on Taittirīya Āraṇyaka structure."
+        note: "Background on Aruna Prashnam,Taittirīya Āraṇyaka structure."
+      },
+            {
+        id: "102_Intro_2",
+        date: "2026-01-14",
+        title: "Introduction —  Aruṇa Prashnam overview - 2",
+        audio: "Audio/102_Intro_2.mp4",
+        transcriptionDocx: "Images/102_Intro_2_transcription.docx",
+        summaryDocx: "Images/102_Intro_2_summary.docx",
+        note: " Aruna Prashnam Introduction 2"
+      },
+            {
+        id: "103_Panchadi_1",
+        date: "2026-01-15",
+        title: "Aruna Prashnam - Panchadi 1",
+        audio: "Audio/103_1st_Panchadi.mp4",
+        transcriptionDocx: "Images/103_1st_Panchadi_transcription.docx",
+        summaryDocx: "Images/103_1st_Panchadi_summary.docx",
+        note: "Aruna Prashnam - Panchadi 1"
       }
     ]
   }
