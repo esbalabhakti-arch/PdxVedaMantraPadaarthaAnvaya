@@ -24,7 +24,7 @@ const PODCAST_LIBRARY = [
 ];
 
 // ------------------------------
-// UI Elements (safe getters)
+// UI Elements
 // ------------------------------
 const $ = (id) => document.getElementById(id);
 
@@ -129,7 +129,7 @@ async function loadDocxToHtml(docxPath) {
       throw new Error(
         `Could not fetch: ${docxPath}\n` +
         `HTTP ${res.status} ${res.statusText}\n\n` +
-        `Check that the file exists in your repo and the folder names match exactly (Audio vs audio, Images vs images).`
+        `Check that the file exists in your repo and folder names match exactly (Audio vs audio, Images vs images).`
       );
     }
 
@@ -163,7 +163,6 @@ async function loadEpisode(ep) {
   stopAndResetPlayer();
   setPlayerSource(ep.audio);
 
-  // Try autoplay once ready
   const tryAutoplay = async () => {
     try {
       await audioPlayer.play();
@@ -194,7 +193,7 @@ async function loadEpisode(ep) {
     };
   }
 
-  // Load transcription/summary below audio
+  // Load transcription/summary
   if (currentMode === "transcription") {
     setStatus("Loading transcription…");
     await loadDocxToHtml(ep.transcriptionDocx);
@@ -221,7 +220,7 @@ function populateTextSelect() {
   });
 }
 
-function populateDateSelect(textObj) {
+function populatePodcastSelect(textObj) {
   if (!dateSelect) return;
   dateSelect.innerHTML = "";
 
@@ -230,7 +229,7 @@ function populateDateSelect(textObj) {
   if (!eps.length) {
     const opt = document.createElement("option");
     opt.value = "";
-    opt.textContent = "(No episodes yet)";
+    opt.textContent = "(No podcasts yet)";
     dateSelect.appendChild(opt);
     return;
   }
@@ -238,7 +237,8 @@ function populateDateSelect(textObj) {
   eps.forEach(ep => {
     const opt = document.createElement("option");
     opt.value = ep.date;
-    opt.textContent = ep.date;
+    // Make it easier when there are many episodes:
+    opt.textContent = `${ep.date} — ${ep.title}`;
     dateSelect.appendChild(opt);
   });
 }
@@ -250,7 +250,7 @@ if (textSelect) {
   textSelect.addEventListener("change", async () => {
     currentText = textSelect.value;
     const textObj = findTextObj(currentText);
-    populateDateSelect(textObj);
+    populatePodcastSelect(textObj);
 
     const ep = findEpisodeByDate(textObj, dateSelect?.value);
     if (ep) await loadEpisode(ep);
@@ -293,7 +293,7 @@ if (btnSummary) {
     null;
 
   const textObj = findTextObj(currentText);
-  populateDateSelect(textObj);
+  populatePodcastSelect(textObj);
 
   setToggle("transcription");
 
@@ -301,7 +301,7 @@ if (btnSummary) {
   if (ep) {
     loadEpisode(ep);
   } else {
-    if (docBody) docBody.innerHTML = "No episodes yet.";
+    if (docBody) docBody.innerHTML = "No podcasts yet.";
     setStatus("Ready.");
   }
 })();
