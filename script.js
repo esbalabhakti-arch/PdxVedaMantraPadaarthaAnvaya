@@ -6,9 +6,6 @@
 //  - Images/<id>_summary.docx
 // ------------------------------
 
-// Bump this when you change the file so you can confirm the latest JS loaded:
-const BUILD_TAG = "2026-01-17_fix_dropdown_v2";
-
 const PODCAST_LIBRARY = [
   {
     text: "Aruna Prashnam",
@@ -50,7 +47,7 @@ const PODCAST_LIBRARY = [
 const $ = (id) => document.getElementById(id);
 
 const textSelect = $("textSelect");
-const dateSelect = $("dateSelect"); // this is now your "Podcast" dropdown in the UI
+const podcastSelect = $("dateSelect"); // labeled as "Podcast" in UI
 const btnTranscription = $("btnTranscription");
 const btnSummary = $("btnSummary");
 const statusMsg = $("statusMsg");
@@ -65,7 +62,9 @@ const docTitle = $("docTitle");
 const docBody = $("docBody");
 const docError = $("docError");
 
+// ------------------------------
 // State
+// ------------------------------
 let currentMode = "transcription"; // "transcription" | "summary"
 let currentText = null;
 let currentEpisode = null;
@@ -106,7 +105,7 @@ function setToggle(mode) {
 }
 
 function sortByDateDesc(a, b) {
-  return (a.date < b.date) ? 1 : (a.date > b.date) ? -1 : 0;
+  return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
 }
 
 function findTextObj(textName) {
@@ -118,29 +117,27 @@ function findEpisodeById(textObj, episodeId) {
   return (textObj.episodes || []).find(e => e.id === episodeId) || null;
 }
 
-function stopAndResetPlayer() {
+function resetPlayer() {
   if (!audioPlayer) return;
-  try {
-    audioPlayer.pause();
-    audioPlayer.currentTime = 0;
-  } catch (_) {}
+  audioPlayer.pause();
+  audioPlayer.currentTime = 0;
 }
 
 function setPlayerSource(src) {
   if (!audioPlayer) return;
   audioPlayer.src = src;
-  audioPlayer.load();
+  audioPlayer.load(); // DO NOT play
 }
 
 // ------------------------------
-// DOCX -> HTML loading via Mammoth
+// DOCX → HTML (Mammoth)
 // ------------------------------
 async function loadDocxToHtml(docxPath) {
   clearError(docError);
   if (docBody) docBody.innerHTML = "Loading…";
 
   if (!window.mammoth) {
-    showError(docError, "mammoth.js did not load. Check your internet connection or the script tag.");
+    showError(docError, "mammoth.js failed to load.");
     return;
   }
 
@@ -148,24 +145,22 @@ async function loadDocxToHtml(docxPath) {
     const res = await fetch(docxPath, { cache: "no-cache" });
     if (!res.ok) {
       throw new Error(
-        `Could not fetch: ${docxPath}\n` +
-        `HTTP ${res.status} ${res.statusText}\n\n` +
-        `Check: file exists + exact folder/file capitalization.`
+        `Could not load file:\n${docxPath}\n\nCheck file name and folder capitalization.`
       );
     }
 
-    const arrayBuffer = await res.arrayBuffer();
-    const result = await mammoth.convertToHtml({ arrayBuffer });
-
+    const buffer = await res.arrayBuffer();
+    const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
     const html = (result.value || "").trim();
-    if (docBody) docBody.innerHTML = html ? html : "<p>(No content found in document.)</p>";
+
+    docBody.innerHTML = html || "<p>(No content found)</p>";
   } catch (err) {
     showError(docError, String(err));
   }
 }
 
 // ------------------------------
-// Episode loading
+// Episode loading (NO AUTOPLAY)
 // ------------------------------
 async function loadEpisode(ep) {
   if (!ep) return;
@@ -174,56 +169,30 @@ async function loadEpisode(ep) {
   clearError(audioError);
   clearError(docError);
 
-  if (episodeTitle) episodeTitle.textContent = ep.title || "Selected episode";
+  if (episodeTitle) episodeTitle.textContent = ep.title;
   if (episodeMeta) {
-    episodeMeta.textContent = `${currentText} • ${ep.date}${ep.note ? " • " + ep.note : ""}`;
+    episodeMeta.textContent =
+      `${currentText} • ${ep.date}${ep.note ? " • " + ep.note : ""}`;
   }
 
-  // Load audio
-  setStatus("Loading audio…");
-  stopAndResetPlayer();
+  // Audio (manual play only)
+  setStatus("Ready.");
+  resetPlayer();
   setPlayerSource(ep.audio);
 
-  const tryAutoplay = async () => {
-    try {
-      await audioPlayer.play();
-      setStatus("Playing.");
-    } catch {
-      setStatus("Ready (autoplay may be blocked; click Play once).");
-      showError(
-        audioError,
-        "Autoplay was blocked by your browser.\nClick Play once, then future selections will usually autoplay."
-      );
-    }
+  audioPlayer.onerror = () => {
+    showError(
+      audioError,
+      `Audio failed to load:\n${ep.audio}\n\nCheck file path and commit status.`
+    );
   };
 
-  if (audioPlayer) {
-    audioPlayer.oncanplay = () => { tryAutoplay(); };
-
-    audioPlayer.onerror = () => {
-      setStatus("Audio failed to load.");
-      showError(
-        audioError,
-        `Audio failed to load: ${ep.audio}\n\n` +
-        `Common causes:\n` +
-        `1) File path mismatch (case-sensitive)\n` +
-        `2) File not committed/pushed to GitHub\n` +
-        `3) Browser can't decode the MP4 codec\n\n` +
-        `Tip: MP3 is the most compatible format.`
-      );
-    };
-  }
-
-  // Load transcription/summary
+  // Load text
   if (currentMode === "transcription") {
-    setStatus("Loading transcription…");
     await loadDocxToHtml(ep.transcriptionDocx);
   } else {
-    setStatus("Loading summary…");
     await loadDocxToHtml(ep.summaryDocx);
   }
-
-  setStatus("Ready.");
 }
 
 // ------------------------------
@@ -242,68 +211,56 @@ function populateTextSelect() {
 }
 
 function populatePodcastSelect(textObj) {
-  if (!dateSelect) return;
-  dateSelect.innerHTML = "";
+  if (!podcastSelect) return;
+  podcastSelect.innerHTML = "";
 
   const eps = (textObj?.episodes || []).slice().sort(sortByDateDesc);
 
-  // Debug: confirm episode count in UI status
-  setStatus(`Loaded: ${eps.length} podcasts • ${BUILD_TAG}`);
-
   if (!eps.length) {
     const opt = document.createElement("option");
-    opt.value = "";
     opt.textContent = "(No podcasts yet)";
-    dateSelect.appendChild(opt);
+    podcastSelect.appendChild(opt);
     return;
   }
 
   eps.forEach(ep => {
     const opt = document.createElement("option");
-    opt.value = ep.id; // IMPORTANT: use id as value (robust)
+    opt.value = ep.id;
     opt.textContent = `${ep.date} — ${ep.title}`;
-    dateSelect.appendChild(opt);
+    podcastSelect.appendChild(opt);
   });
 
-  // Select the newest (first in sorted list) by default
-  dateSelect.value = eps[0].id;
+  // Default = newest
+  podcastSelect.value = eps[0].id;
 }
 
 // ------------------------------
 // Event handlers
 // ------------------------------
-if (textSelect) {
-  textSelect.addEventListener("change", async () => {
-    currentText = textSelect.value;
-    const textObj = findTextObj(currentText);
-    populatePodcastSelect(textObj);
+textSelect?.addEventListener("change", async () => {
+  currentText = textSelect.value;
+  const textObj = findTextObj(currentText);
+  populatePodcastSelect(textObj);
 
-    const ep = findEpisodeById(textObj, dateSelect?.value);
-    if (ep) await loadEpisode(ep);
-  });
-}
+  const ep = findEpisodeById(textObj, podcastSelect.value);
+  if (ep) await loadEpisode(ep);
+});
 
-if (dateSelect) {
-  dateSelect.addEventListener("change", async () => {
-    const textObj = findTextObj(currentText);
-    const ep = findEpisodeById(textObj, dateSelect.value);
-    if (ep) await loadEpisode(ep);
-  });
-}
+podcastSelect?.addEventListener("change", async () => {
+  const textObj = findTextObj(currentText);
+  const ep = findEpisodeById(textObj, podcastSelect.value);
+  if (ep) await loadEpisode(ep);
+});
 
-if (btnTranscription) {
-  btnTranscription.addEventListener("click", async () => {
-    setToggle("transcription");
-    if (currentEpisode) await loadEpisode(currentEpisode);
-  });
-}
+btnTranscription?.addEventListener("click", async () => {
+  setToggle("transcription");
+  if (currentEpisode) await loadEpisode(currentEpisode);
+});
 
-if (btnSummary) {
-  btnSummary.addEventListener("click", async () => {
-    setToggle("summary");
-    if (currentEpisode) await loadEpisode(currentEpisode);
-  });
-}
+btnSummary?.addEventListener("click", async () => {
+  setToggle("summary");
+  if (currentEpisode) await loadEpisode(currentEpisode);
+});
 
 // ------------------------------
 // Initial load
@@ -314,8 +271,8 @@ if (btnSummary) {
   populateTextSelect();
 
   currentText =
-    (textSelect && textSelect.value) ||
-    (PODCAST_LIBRARY[0] && PODCAST_LIBRARY[0].text) ||
+    textSelect?.value ||
+    PODCAST_LIBRARY[0]?.text ||
     null;
 
   const textObj = findTextObj(currentText);
@@ -323,11 +280,7 @@ if (btnSummary) {
 
   setToggle("transcription");
 
-  const ep = findEpisodeById(textObj, dateSelect?.value);
-  if (ep) {
-    loadEpisode(ep);
-  } else {
-    if (docBody) docBody.innerHTML = "No podcasts yet.";
-    setStatus("Ready.");
-  }
+  const ep = findEpisodeById(textObj, podcastSelect.value);
+  if (ep) loadEpisode(ep);
+  else setStatus("Ready.");
 })();
