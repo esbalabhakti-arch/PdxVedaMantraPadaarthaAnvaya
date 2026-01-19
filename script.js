@@ -2,8 +2,8 @@
 // CONFIG: Update only this section when you add new episodes
 // Folder structure expected (case-sensitive on GitHub Pages):
 //  - Audio/<id>.mp4
-//  - Images/<id>_transcription.docx
-//  - Images/<id>_summary.docx
+//  - Images/<id>_transcription.txt
+//  - Images/<id>_summary.txt
 // ------------------------------
 
 const PODCAST_LIBRARY = [
@@ -15,8 +15,8 @@ const PODCAST_LIBRARY = [
         date: "2026-01-13",
         title: "Introduction — Aruṇa Prashnam overview - 1",
         audio: "Audio/101_Intro_1.mp4",
-        transcriptionDocx: "Images/101_Intro_1_transcription.docx",
-        summaryDocx: "Images/101_Intro_1_summary.docx",
+        transcriptionDocx: "Images/101_Intro_1_transcription.txt",
+        summaryDocx: "Images/101_Intro_1_summary.txt",
         note: "Background on Aruna Prashnam, Taittirīya Āraṇyaka structure."
       },
       {
@@ -24,8 +24,8 @@ const PODCAST_LIBRARY = [
         date: "2026-01-14",
         title: "Introduction — Aruṇa Prashnam overview - 2",
         audio: "Audio/102_Intro_2.mp4",
-        transcriptionDocx: "Images/102_Intro_2_transcription.docx",
-        summaryDocx: "Images/102_Intro_2_summary.docx",
+        transcriptionDocx: "Images/102_Intro_2_transcription.txt",
+        summaryDocx: "Images/102_Intro_2_summary.txt",
         note: "Aruna Prashnam Introduction 2"
       },
       {
@@ -33,8 +33,8 @@ const PODCAST_LIBRARY = [
         date: "2026-01-15",
         title: "Aruna Prashnam - Panchadi 1",
         audio: "Audio/103_1st_Panchadi.mp4",
-        transcriptionDocx: "Images/103_1st_Panchadi_transcription.docx",
-        summaryDocx: "Images/103_1st_Panchadi_summary.docx",
+        transcriptionDocx: "Images/103_1st_Panchadi_transcription.txt",
+        summaryDocx: "Images/103_1st_Panchadi_summary.txt",
         note: "Aruna Prashnam - Panchadi 1"
       },
       {
@@ -42,8 +42,8 @@ const PODCAST_LIBRARY = [
         date: "2026-01-18",
         title: "Aruna Prashnam - Panchadi 2 - Part1",
         audio: "Audio/104_2nd_Panchadi_Part1.mp4",
-        transcriptionDocx: "Images/104_2nd_Panchadi_Part1_transcription.docx",
-        summaryDocx: "Images/104_2nd_Panchadi_Part1_summary.docx",
+        transcriptionDocx: "Images/104_2nd_Panchadi_Part1_transcription.txt",
+        summaryDocx: "Images/104_2nd_Panchadi_Part1_summary.txt",
         note: "Aruna Prashnam - Panchadi 2 - Part1"
       }
     ]
@@ -139,30 +139,48 @@ function setPlayerSource(src) {
 }
 
 // ------------------------------
-// DOCX → HTML (Mammoth)
+// TXT → HTML (simple rendering)
 // ------------------------------
-async function loadDocxToHtml(docxPath) {
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function txtToHtml(txt) {
+  // Keep it simple and readable:
+  // - split on blank lines into paragraphs
+  // - preserve single newlines as <br>
+  const normalized = txt.replace(/\r/g, "").trim();
+
+  if (!normalized) return "<p>(No content found)</p>";
+
+  const blocks = normalized.split(/\n\s*\n+/g);
+  const html = blocks.map(block => {
+    const safe = escapeHtml(block).replace(/\n/g, "<br>");
+    return `<p>${safe}</p>`;
+  }).join("");
+
+  return html;
+}
+
+async function loadTxtToHtml(txtPath) {
   clearError(docError);
   if (docBody) docBody.innerHTML = "Loading…";
 
-  if (!window.mammoth) {
-    showError(docError, "mammoth.js failed to load.");
-    return;
-  }
-
   try {
-    const res = await fetch(docxPath, { cache: "no-cache" });
+    const res = await fetch(txtPath, { cache: "no-cache" });
     if (!res.ok) {
       throw new Error(
-        `Could not load file:\n${docxPath}\n\nCheck file name and folder capitalization.`
+        `Could not load file:\n${txtPath}\n\nCheck file name and folder capitalization.`
       );
     }
 
-    const buffer = await res.arrayBuffer();
-    const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
-    const html = (result.value || "").trim();
-
-    docBody.innerHTML = html || "<p>(No content found)</p>";
+    const txt = await res.text();
+    docBody.innerHTML = txtToHtml(txt);
   } catch (err) {
     showError(docError, String(err));
   }
@@ -196,11 +214,11 @@ async function loadEpisode(ep) {
     );
   };
 
-  // Load text
+  // Load text (now using .txt)
   if (currentMode === "transcription") {
-    await loadDocxToHtml(ep.transcriptionDocx);
+    await loadTxtToHtml(ep.transcriptionDocx);
   } else {
-    await loadDocxToHtml(ep.summaryDocx);
+    await loadTxtToHtml(ep.summaryDocx);
   }
 }
 
