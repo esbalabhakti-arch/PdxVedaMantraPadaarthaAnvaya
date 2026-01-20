@@ -45,6 +45,15 @@ const PODCAST_LIBRARY = [
         transcriptionDocx: "Images/104_2nd_Panchadi_Part1_transcription.txt",
         summaryDocx: "Images/104_2nd_Panchadi_Part1_summary.txt",
         note: "Aruna Prashnam - Panchadi 2 - Part1"
+      },
+      {
+        id: "105_Panchadi_2_Part2",
+        date: "2026-01-20",
+        title: "Aruna Prashnam - Panchadi 2 - Part2",
+        audio: "Audio/105_2nd_Panchadi_Part2.mp4",
+        transcriptionDocx: "Images/105_2nd_Panchadi_Part2_transcription.txt",
+        summaryDocx: "Images/105_2nd_Panchadi_Part2_summary.txt",
+        note: "Aruna Prashnam - Panchadi 2 - Part2"
       }
     ]
   }
