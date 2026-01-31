@@ -3,7 +3,7 @@
 // Folder structure expected (case-sensitive on GitHub Pages):
 //  - Audio/<id>.mp4
 //  - Images/<id>_transcription.txt
-//  - Images/<id>_summary.txt
+//  - Images/<id>_summary.txt OR .pdf
 // ------------------------------
 
 const PODCAST_LIBRARY = [
@@ -79,7 +79,7 @@ const PODCAST_LIBRARY = [
         title: "Understanding Laghu Sankalpam (Shri Ashok K)",
         audio: "Audio/20260131_1.mp4",
         transcriptionDocx: "Images/sankalpa_transcription.txt",
-        summaryDocx: "Images/sankalpa_summary.txt",
+        summaryDocx: "Images/sankalpa_summary.pdf",   // ✅ changed to PDF
         note: "Laghu sankalpam basics"
       }
     ]
@@ -174,6 +174,14 @@ function setPlayerSource(src) {
   audioPlayer.load(); // DO NOT play
 }
 
+function isPdfPath(path) {
+  return typeof path === "string" && path.toLowerCase().trim().endsWith(".pdf");
+}
+
+function isTxtPath(path) {
+  return typeof path === "string" && path.toLowerCase().trim().endsWith(".txt");
+}
+
 // ------------------------------
 // TXT → HTML (simple rendering)
 // ------------------------------
@@ -187,11 +195,7 @@ function escapeHtml(s) {
 }
 
 function txtToHtml(txt) {
-  // Keep it simple and readable:
-  // - split on blank lines into paragraphs
-  // - preserve single newlines as <br>
   const normalized = txt.replace(/\r/g, "").trim();
-
   if (!normalized) return "<p>(No content found)</p>";
 
   const blocks = normalized.split(/\n\s*\n+/g);
@@ -223,6 +227,49 @@ async function loadTxtToHtml(txtPath) {
 }
 
 // ------------------------------
+// PDF embed (scrollable, multi-page)
+// ------------------------------
+function loadPdfEmbed(pdfPath) {
+  clearError(docError);
+  if (!docBody) return;
+
+  // Add #toolbar=1 and #view=FitH to help some mobile viewers,
+  // but leave default scrolling behavior intact.
+  const pdfUrl = `${pdfPath}#view=FitH`;
+
+  docBody.innerHTML = `
+    <iframe class="pdfFrame" src="${pdfUrl}" title="PDF Summary"></iframe>
+    <div class="pdfActions">
+      <a href="${pdfPath}" target="_blank" rel="noopener">Open PDF in new tab</a>
+      <a href="${pdfPath}" download>Download PDF</a>
+    </div>
+  `;
+}
+
+// ------------------------------
+// Unified loader for transcription/summary
+// ------------------------------
+async function loadDoc(path) {
+  if (!path) {
+    if (docBody) docBody.innerHTML = "<p>(No document path provided)</p>";
+    return;
+  }
+
+  if (isPdfPath(path)) {
+    loadPdfEmbed(path);
+    return;
+  }
+
+  if (isTxtPath(path)) {
+    await loadTxtToHtml(path);
+    return;
+  }
+
+  // Fallback: try as text
+  await loadTxtToHtml(path);
+}
+
+// ------------------------------
 // Episode loading (NO AUTOPLAY)
 // ------------------------------
 async function loadEpisode(ep) {
@@ -250,12 +297,9 @@ async function loadEpisode(ep) {
     );
   };
 
-  // Load text (now using .txt)
-  if (currentMode === "transcription") {
-    await loadTxtToHtml(ep.transcriptionDocx);
-  } else {
-    await loadTxtToHtml(ep.summaryDocx);
-  }
+  // Load transcription/summary
+  const docPath = (currentMode === "transcription") ? ep.transcriptionDocx : ep.summaryDocx;
+  await loadDoc(docPath);
 }
 
 // ------------------------------
