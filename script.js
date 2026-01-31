@@ -72,6 +72,15 @@ const PODCAST_LIBRARY = [
         transcriptionDocx: "Images/107_3rd_Panchadi_Part2_transcription.txt",
         summaryDocx: "Images/107_3rd_Panchadi_Part2_summary.txt",
         note: "Aruna Prashnam - Panchadi 3 - Part2"
+      },
+      {
+        id: "P01_Sankalpam_Basics",
+        date: "2026-01-30",
+        title: "Understanding Laghu Sankalpam (Shri Ashok K)",
+        audio: "Audio/20260131_1.mp4",
+        transcriptionDocx: "Images/sankalpa_transcription.txt",
+        summaryDocx: "Images/sankalpa_summary.txt",
+        note: "Laghu sankalpam basics"
       }
     ]
   }
