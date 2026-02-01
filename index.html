@@ -75,7 +75,7 @@
     .controlsRow{
       display:flex;
       flex-wrap:wrap;
-      justify-content:center;   /* CENTERED */
+      justify-content:center;
       gap:12px;
       width:100%;
     }
@@ -173,19 +173,8 @@
       overflow:auto;
     }
 
-    .docBody p{ margin:0 0 10px; line-height:1.6; }
-
-    /* PDF embed style */
-    .pdfFrame{
-      width: 100%;
-      height: 70vh; /* taller than text mode */
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 12px;
-      background: rgba(0,0,0,0.2);
-    }
-
+    /* ✅ Added: PDF link row styling */
     .pdfActions{
-      margin-top: 10px;
       display:flex;
       gap:10px;
       flex-wrap:wrap;
@@ -195,6 +184,8 @@
       color: rgba(255,255,255,0.92);
       text-decoration: underline;
     }
+
+    .docBody p{ margin:0 0 10px; line-height:1.6; }
 
     .footer{
       margin-top: 28px;
@@ -208,7 +199,7 @@
     @media (max-width:640px){
       .bannerFrame img{ height:140px; }
       select{ min-width:260px; }
-      .pdfFrame{ height: 75vh; }
+      .docBody{ max-height: 62vh; }
     }
   </style>
 </head>
@@ -241,17 +232,15 @@
           <button id="btnSummary" type="button">Podcast Summary</button>
         </div>
       </div>
-
-      <!-- IMPORTANT: removed the Ready/status box completely -->
     </div>
 
-    <!-- Audio (ONLY player, no redundant title/meta above it) -->
+    <!-- Audio -->
     <div class="card">
       <video id="audioPlayer" controls playsinline preload="metadata"></video>
       <div class="error" id="audioError" style="display:none;"></div>
     </div>
 
-    <!-- Text / PDF -->
+    <!-- Text -->
     <div class="card">
       <div class="docHeader">
         <h3 id="docTitle">Transcription</h3>
