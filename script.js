@@ -3,7 +3,8 @@
 // Folder structure expected (case-sensitive on GitHub Pages):
 //  - Audio/<id>.mp4
 //  - Images/<id>_transcription.txt
-//  - Images/<id>_summary.txt OR .pdf
+//  - Images/<id>_summary.txt
+//  - (Optional) Images/<id>_summary.pdf
 // ------------------------------
 
 const PODCAST_LIBRARY = [
@@ -73,13 +74,16 @@ const PODCAST_LIBRARY = [
         summaryDocx: "Images/107_3rd_Panchadi_Part2_summary.txt",
         note: "Aruna Prashnam - Panchadi 3 - Part2"
       },
+
+      // ✅ Special case: Sankalpam episode has BOTH summary TXT and summary PDF
       {
         id: "P01_Sankalpam_Basics",
         date: "2026-01-30",
         title: "Understanding Laghu Sankalpam (Shri Ashok K)",
         audio: "Audio/20260131_1.mp4",
         transcriptionDocx: "Images/sankalpa_transcription.txt",
-        summaryDocx: "Images/sankalpa_summary.pdf",   // ✅ changed to PDF
+        summaryDocx: "Images/sankalpa_summary.txt",        // ✅ readable text shown on page
+        summaryPdf: "Images/sankalpa_summary.pdf",         // ✅ link shown on top
         note: "Laghu sankalpam basics"
       }
     ]
@@ -91,14 +95,9 @@ const PODCAST_LIBRARY = [
 // ------------------------------
 const $ = (id) => document.getElementById(id);
 
-const textSelect = $("textSelect");
-const podcastSelect = $("dateSelect"); // labeled as "Podcast" in UI
+const podcastSelect = $("dateSelect");
 const btnTranscription = $("btnTranscription");
 const btnSummary = $("btnSummary");
-const statusMsg = $("statusMsg");
-
-const episodeTitle = $("episodeTitle");
-const episodeMeta = $("episodeMeta");
 
 const audioPlayer = $("audioPlayer");
 const audioError = $("audioError");
@@ -111,16 +110,12 @@ const docError = $("docError");
 // State
 // ------------------------------
 let currentMode = "transcription"; // "transcription" | "summary"
-let currentText = null;
+let currentText = PODCAST_LIBRARY[0]?.text || "";
 let currentEpisode = null;
 
 // ------------------------------
 // Helpers
 // ------------------------------
-function setStatus(msg) {
-  if (statusMsg) statusMsg.textContent = msg;
-}
-
 function showError(el, msg) {
   if (!el) return;
   el.style.display = "block";
@@ -171,15 +166,7 @@ function resetPlayer() {
 function setPlayerSource(src) {
   if (!audioPlayer) return;
   audioPlayer.src = src;
-  audioPlayer.load(); // DO NOT play
-}
-
-function isPdfPath(path) {
-  return typeof path === "string" && path.toLowerCase().trim().endsWith(".pdf");
-}
-
-function isTxtPath(path) {
-  return typeof path === "string" && path.toLowerCase().trim().endsWith(".txt");
+  audioPlayer.load(); // DO NOT autoplay
 }
 
 // ------------------------------
@@ -199,12 +186,21 @@ function txtToHtml(txt) {
   if (!normalized) return "<p>(No content found)</p>";
 
   const blocks = normalized.split(/\n\s*\n+/g);
-  const html = blocks.map(block => {
+  return blocks.map(block => {
     const safe = escapeHtml(block).replace(/\n/g, "<br>");
     return `<p>${safe}</p>`;
   }).join("");
+}
 
-  return html;
+async function fetchTxtAsHtml(txtPath) {
+  const res = await fetch(txtPath, { cache: "no-cache" });
+  if (!res.ok) {
+    throw new Error(
+      `Could not load file:\n${txtPath}\n\nCheck file name and folder capitalization.`
+    );
+  }
+  const txt = await res.text();
+  return txtToHtml(txt);
 }
 
 async function loadTxtToHtml(txtPath) {
@@ -212,61 +208,11 @@ async function loadTxtToHtml(txtPath) {
   if (docBody) docBody.innerHTML = "Loading…";
 
   try {
-    const res = await fetch(txtPath, { cache: "no-cache" });
-    if (!res.ok) {
-      throw new Error(
-        `Could not load file:\n${txtPath}\n\nCheck file name and folder capitalization.`
-      );
-    }
-
-    const txt = await res.text();
-    docBody.innerHTML = txtToHtml(txt);
+    const html = await fetchTxtAsHtml(txtPath);
+    docBody.innerHTML = html;
   } catch (err) {
     showError(docError, String(err));
   }
-}
-
-// ------------------------------
-// PDF embed (scrollable, multi-page)
-// ------------------------------
-function loadPdfEmbed(pdfPath) {
-  clearError(docError);
-  if (!docBody) return;
-
-  // Add #toolbar=1 and #view=FitH to help some mobile viewers,
-  // but leave default scrolling behavior intact.
-  const pdfUrl = `${pdfPath}#view=FitH`;
-
-  docBody.innerHTML = `
-    <iframe class="pdfFrame" src="${pdfUrl}" title="PDF Summary"></iframe>
-    <div class="pdfActions">
-      <a href="${pdfPath}" target="_blank" rel="noopener">Open PDF in new tab</a>
-      <a href="${pdfPath}" download>Download PDF</a>
-    </div>
-  `;
-}
-
-// ------------------------------
-// Unified loader for transcription/summary
-// ------------------------------
-async function loadDoc(path) {
-  if (!path) {
-    if (docBody) docBody.innerHTML = "<p>(No document path provided)</p>";
-    return;
-  }
-
-  if (isPdfPath(path)) {
-    loadPdfEmbed(path);
-    return;
-  }
-
-  if (isTxtPath(path)) {
-    await loadTxtToHtml(path);
-    return;
-  }
-
-  // Fallback: try as text
-  await loadTxtToHtml(path);
 }
 
 // ------------------------------
@@ -279,14 +225,7 @@ async function loadEpisode(ep) {
   clearError(audioError);
   clearError(docError);
 
-  if (episodeTitle) episodeTitle.textContent = ep.title;
-  if (episodeMeta) {
-    episodeMeta.textContent =
-      `${currentText} • ${ep.date}${ep.note ? " • " + ep.note : ""}`;
-  }
-
   // Audio (manual play only)
-  setStatus("Ready.");
   resetPlayer();
   setPlayerSource(ep.audio);
 
@@ -297,26 +236,43 @@ async function loadEpisode(ep) {
     );
   };
 
-  // Load transcription/summary
-  const docPath = (currentMode === "transcription") ? ep.transcriptionDocx : ep.summaryDocx;
-  await loadDoc(docPath);
+  // Load transcription / summary
+  if (currentMode === "transcription") {
+    await loadTxtToHtml(ep.transcriptionDocx);
+  } else {
+    // ✅ Summary view:
+    // 1) show PDF link(s) on top if available
+    // 2) show summary TXT below (scrollable in docBody)
+    if (ep.summaryPdf && typeof ep.summaryPdf === "string" && ep.summaryPdf.trim()) {
+      clearError(docError);
+
+      if (docBody) {
+        docBody.innerHTML = `
+          <div class="pdfActions" style="margin-bottom:12px;">
+            <a href="${ep.summaryPdf}" target="_blank" rel="noopener">Open PDF summary in new tab</a>
+            <a href="${ep.summaryPdf}" download>Download PDF</a>
+          </div>
+          <div id="summaryTextInner">Loading…</div>
+        `;
+      }
+
+      try {
+        const html = await fetchTxtAsHtml(ep.summaryDocx);
+        const inner = document.getElementById("summaryTextInner");
+        if (inner) inner.innerHTML = html;
+      } catch (err) {
+        showError(docError, String(err));
+      }
+    } else {
+      // Normal episodes: just show summary txt
+      await loadTxtToHtml(ep.summaryDocx);
+    }
+  }
 }
 
 // ------------------------------
 // UI population
 // ------------------------------
-function populateTextSelect() {
-  if (!textSelect) return;
-  textSelect.innerHTML = "";
-
-  PODCAST_LIBRARY.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.text;
-    opt.textContent = t.text;
-    textSelect.appendChild(opt);
-  });
-}
-
 function populatePodcastSelect(textObj) {
   if (!podcastSelect) return;
   podcastSelect.innerHTML = "";
@@ -344,15 +300,6 @@ function populatePodcastSelect(textObj) {
 // ------------------------------
 // Event handlers
 // ------------------------------
-textSelect?.addEventListener("change", async () => {
-  currentText = textSelect.value;
-  const textObj = findTextObj(currentText);
-  populatePodcastSelect(textObj);
-
-  const ep = findEpisodeById(textObj, podcastSelect.value);
-  if (ep) await loadEpisode(ep);
-});
-
 podcastSelect?.addEventListener("change", async () => {
   const textObj = findTextObj(currentText);
   const ep = findEpisodeById(textObj, podcastSelect.value);
@@ -373,15 +320,6 @@ btnSummary?.addEventListener("click", async () => {
 // Initial load
 // ------------------------------
 (function init() {
-  setStatus("Initializing…");
-
-  populateTextSelect();
-
-  currentText =
-    textSelect?.value ||
-    PODCAST_LIBRARY[0]?.text ||
-    null;
-
   const textObj = findTextObj(currentText);
   populatePodcastSelect(textObj);
 
@@ -389,5 +327,4 @@ btnSummary?.addEventListener("click", async () => {
 
   const ep = findEpisodeById(textObj, podcastSelect.value);
   if (ep) loadEpisode(ep);
-  else setStatus("Ready.");
 })();
