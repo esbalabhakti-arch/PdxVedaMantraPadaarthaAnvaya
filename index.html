@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -71,7 +72,7 @@
       margin: 10px 0 14px;
     }
 
-    /* Podcast dropdown centered */
+    /* Dropdowns centered */
     .controlsRow{
       display:flex;
       flex-wrap:wrap;
@@ -173,12 +174,13 @@
       overflow:auto;
     }
 
-    /* ✅ Added: PDF link row styling */
+    /* PDF link row styling */
     .pdfActions{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
+      margin-bottom: 12px;
     }
     .pdfActions a{
       color: rgba(255,255,255,0.92);
@@ -217,8 +219,13 @@
     <!-- Controls -->
     <div class="controlsWrap">
 
-      <!-- Podcast dropdown centered -->
+      <!-- Topic + Podcast dropdowns -->
       <div class="controlsRow">
+        <div class="field">
+          <label for="topicSelect">Topic</label>
+          <select id="topicSelect"></select>
+        </div>
+
         <div class="field">
           <label for="dateSelect">Podcast</label>
           <select id="dateSelect"></select>
