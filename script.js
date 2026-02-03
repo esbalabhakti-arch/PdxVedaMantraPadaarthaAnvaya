@@ -85,6 +85,15 @@ const PODCAST_LIBRARY = [
         summaryDocx: "Images/sankalpa_summary.txt",        // ✅ readable text shown on page
         summaryPdf: "Images/sankalpa_summary.pdf",         // ✅ link shown on top
         note: "Laghu sankalpam basics"
+      },
+      {
+        id: "108_Panchadi_4",
+        date: "2026-02-02",
+        title: "Aruna Prashnam - Panchadi 4",
+        audio: "Audio/108_4th_Panchadi.mp4",
+        transcriptionDocx: "Images/108_4th_Panchadi_transcription.txt",
+        summaryDocx: "Images/108_4th_Panchadi_summary.txt",
+        note: "Aruna Prashnam - Panchadi 4"
       }
     ]
   }
