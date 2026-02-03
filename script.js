@@ -1,3 +1,5 @@
+// script.js
+
 // ------------------------------
 // CONFIG: Update only this section when you add new episodes
 // Folder structure expected (case-sensitive on GitHub Pages):
@@ -7,9 +9,10 @@
 //  - (Optional) Images/<id>_summary.pdf
 // ------------------------------
 
-const PODCAST_LIBRARY = [
+// ✅ Now organized by TOPIC → episodes
+const TOPIC_LIBRARY = [
   {
-    text: "Aruna Prashnam",
+    topic: "Aruna Prashnam (Shri Ram Kumar)",
     episodes: [
       {
         id: "101_Intro_1",
@@ -74,18 +77,6 @@ const PODCAST_LIBRARY = [
         summaryDocx: "Images/107_3rd_Panchadi_Part2_summary.txt",
         note: "Aruna Prashnam - Panchadi 3 - Part2"
       },
-
-      // ✅ Special case: Sankalpam episode has BOTH summary TXT and summary PDF
-      {
-        id: "P01_Sankalpam_Basics",
-        date: "2026-01-30",
-        title: "Understanding Laghu Sankalpam (Shri Ashok K)",
-        audio: "Audio/20260131_1.mp4",
-        transcriptionDocx: "Images/sankalpa_transcription.txt",
-        summaryDocx: "Images/sankalpa_summary.txt",        // ✅ readable text shown on page
-        summaryPdf: "Images/sankalpa_summary.pdf",         // ✅ link shown on top
-        note: "Laghu sankalpam basics"
-      },
       {
         id: "108_Panchadi_4",
         date: "2026-02-02",
@@ -96,6 +87,23 @@ const PODCAST_LIBRARY = [
         note: "Aruna Prashnam - Panchadi 4"
       }
     ]
+  },
+
+  // ✅ Move Laghu Sankalpam under Panchangam topic
+  {
+    topic: "Panchangam (Shri Ashok Krishnamoorthy)",
+    episodes: [
+      {
+        id: "P01_Sankalpam_Basics",
+        date: "2026-01-30",
+        title: "Understanding Laghu Sankalpam (Shri Ashok K)",
+        audio: "Audio/20260131_1.mp4",
+        transcriptionDocx: "Images/sankalpa_transcription.txt",
+        summaryDocx: "Images/sankalpa_summary.txt",        // readable text shown on page
+        summaryPdf: "Images/sankalpa_summary.pdf",         // link shown on top
+        note: "Laghu sankalpam basics"
+      }
+    ]
   }
 ];
 
@@ -104,7 +112,9 @@ const PODCAST_LIBRARY = [
 // ------------------------------
 const $ = (id) => document.getElementById(id);
 
+const topicSelect = $("topicSelect");
 const podcastSelect = $("dateSelect");
+
 const btnTranscription = $("btnTranscription");
 const btnSummary = $("btnSummary");
 
@@ -119,7 +129,7 @@ const docError = $("docError");
 // State
 // ------------------------------
 let currentMode = "transcription"; // "transcription" | "summary"
-let currentText = PODCAST_LIBRARY[0]?.text || "";
+let currentTopic = TOPIC_LIBRARY[0]?.topic || "";
 let currentEpisode = null;
 
 // ------------------------------
@@ -157,13 +167,13 @@ function sortByDateDesc(a, b) {
   return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
 }
 
-function findTextObj(textName) {
-  return PODCAST_LIBRARY.find(t => t.text === textName) || null;
+function findTopicObj(topicName) {
+  return TOPIC_LIBRARY.find(t => t.topic === topicName) || null;
 }
 
-function findEpisodeById(textObj, episodeId) {
-  if (!textObj) return null;
-  return (textObj.episodes || []).find(e => e.id === episodeId) || null;
+function findEpisodeById(topicObj, episodeId) {
+  if (!topicObj) return null;
+  return (topicObj.episodes || []).find(e => e.id === episodeId) || null;
 }
 
 function resetPlayer() {
@@ -249,15 +259,15 @@ async function loadEpisode(ep) {
   if (currentMode === "transcription") {
     await loadTxtToHtml(ep.transcriptionDocx);
   } else {
-    // ✅ Summary view:
+    // Summary view:
     // 1) show PDF link(s) on top if available
-    // 2) show summary TXT below (scrollable in docBody)
+    // 2) show summary TXT below
     if (ep.summaryPdf && typeof ep.summaryPdf === "string" && ep.summaryPdf.trim()) {
       clearError(docError);
 
       if (docBody) {
         docBody.innerHTML = `
-          <div class="pdfActions" style="margin-bottom:12px;">
+          <div class="pdfActions">
             <a href="${ep.summaryPdf}" target="_blank" rel="noopener">Open PDF summary in new tab</a>
             <a href="${ep.summaryPdf}" download>Download PDF</a>
           </div>
@@ -273,7 +283,6 @@ async function loadEpisode(ep) {
         showError(docError, String(err));
       }
     } else {
-      // Normal episodes: just show summary txt
       await loadTxtToHtml(ep.summaryDocx);
     }
   }
@@ -282,11 +291,34 @@ async function loadEpisode(ep) {
 // ------------------------------
 // UI population
 // ------------------------------
-function populatePodcastSelect(textObj) {
+function populateTopicSelect() {
+  if (!topicSelect) return;
+  topicSelect.innerHTML = "";
+
+  const topics = TOPIC_LIBRARY.map(t => t.topic);
+  if (!topics.length) {
+    const opt = document.createElement("option");
+    opt.textContent = "(No topics yet)";
+    topicSelect.appendChild(opt);
+    return;
+  }
+
+  topics.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    topicSelect.appendChild(opt);
+  });
+
+  // Default = first
+  topicSelect.value = currentTopic || topics[0];
+}
+
+function populatePodcastSelect(topicObj) {
   if (!podcastSelect) return;
   podcastSelect.innerHTML = "";
 
-  const eps = (textObj?.episodes || []).slice().sort(sortByDateDesc);
+  const eps = (topicObj?.episodes || []).slice().sort(sortByDateDesc);
 
   if (!eps.length) {
     const opt = document.createElement("option");
@@ -309,9 +341,19 @@ function populatePodcastSelect(textObj) {
 // ------------------------------
 // Event handlers
 // ------------------------------
+topicSelect?.addEventListener("change", async () => {
+  currentTopic = topicSelect.value;
+
+  const topicObj = findTopicObj(currentTopic);
+  populatePodcastSelect(topicObj);
+
+  const ep = findEpisodeById(topicObj, podcastSelect.value);
+  if (ep) await loadEpisode(ep);
+});
+
 podcastSelect?.addEventListener("change", async () => {
-  const textObj = findTextObj(currentText);
-  const ep = findEpisodeById(textObj, podcastSelect.value);
+  const topicObj = findTopicObj(currentTopic);
+  const ep = findEpisodeById(topicObj, podcastSelect.value);
   if (ep) await loadEpisode(ep);
 });
 
@@ -329,11 +371,17 @@ btnSummary?.addEventListener("click", async () => {
 // Initial load
 // ------------------------------
 (function init() {
-  const textObj = findTextObj(currentText);
-  populatePodcastSelect(textObj);
+  // Topic dropdown
+  populateTopicSelect();
+
+  // Podcast dropdown for selected topic
+  const topicObj = findTopicObj(topicSelect?.value || currentTopic);
+  currentTopic = topicObj?.topic || currentTopic;
+
+  populatePodcastSelect(topicObj);
 
   setToggle("transcription");
 
-  const ep = findEpisodeById(textObj, podcastSelect.value);
+  const ep = findEpisodeById(topicObj, podcastSelect.value);
   if (ep) loadEpisode(ep);
 })();
