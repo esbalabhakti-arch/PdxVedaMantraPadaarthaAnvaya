@@ -102,6 +102,24 @@ const TOPIC_LIBRARY = [
         summaryDocx: "Images/sankalpa_summary.txt",        // readable text shown on page
         summaryPdf: "Images/sankalpa_summary.pdf",         // link shown on top
         note: "Laghu sankalpam basics"
+      },
+       {
+        id: "P02_Sankalpam_Basics",
+        date: "2026-02-04",
+        title: "Understanding Maha Sankalpam - Part#1 (Shri Ashok K)",
+        audio: "Audio/20260204_Panchangam_1.mp4",
+        transcriptionDocx: "Images/Mahasankalpam_transcription.txt",
+        summaryDocx: "Images/Mahasankalpam_summary.txt",        // readable text shown on page
+        note: "Maha sankalpam basics"
+      },
+       {
+        id: "P03_Sankalpam_Basics",
+        date: "2026-02-04",
+        title: "Understanding Maha Sankalpam - Part#2 (Shri Ashok K)",
+        audio: "Audio/20260204_Panchangam_2.mp4",
+        transcriptionDocx: "Images/Mahasankalpam_transcription_part2.txt",
+        summaryDocx: "Images/Mahasankalpam_summary_part2.txt",        // readable text shown on page
+        note: "Maha sankalpam basics"
       }
     ]
   }
