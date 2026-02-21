@@ -124,7 +124,7 @@ const TOPIC_LIBRARY = [
       },
       {
         id: "113_Panchadi_8_Part1",
-        date: "2026-02-21",
+        date: "2026-02-20",
         title: "Aruna Prashnam - Panchadi 8 - Part1",
         audio: "Audio/113_8th_Panchadi_Part1.mp4",
         transcriptionDocx: "Images/113_8th_Panchadi_Part1_transcription.txt",
