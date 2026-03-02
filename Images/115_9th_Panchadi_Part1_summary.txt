@@ -1,0 +1,28 @@
+The speaker explains two main things: the consequence of doubting śāstra, and the Vedic structuring of time into muhūrtas, days, pakṣas, ṛtus, and the year.
+
+He begins with the line “न हि प्र॒वेद॑ सुकृ॒तस्य॒ पन्था॒मिति॑,” parsed as: “na hi” (surely not), “praveda” (truly / fully knows), “sukṛtasya” (of well‑done action, i.e. puṇya), and “panthām” (the path). This is explicitly linked to the previous (eighth) pañcati’s analogy of a person who distrusts even his true friend; in that context, even if such a person studies the Vedas, the benefit is lost because he does not trust what they say. Here the conclusion is sharpened: one who lacks faith in śāstra “surely does not know the path” to puṇya‑loka, so his knowledge of the route to higher lokas is effectively blocked by his attitude.
+
+After this doctrinal point, the recording turns to technical cosmology and calendrics. Seasons (ṛtu) are presented as ordered segments of time that push or pull each other forward. A phrase glossed as “ऋ॒तुर्-ऋ॑तुना नु॒द्यमा॑नः” is explained to mean that one ṛtu induces or drives the next, so there is no gap between, for example, Vasant ṛtu and Grīṣma ṛtu; seasons follow continuously. Another expression involving “vināda” and “abhidavaḥ” is interpreted as describing seasons as coming forward with a characteristic sound, as if each ṛtu has its own sound‑scape or “nāda” (for example, Varṣā ṛtu being marked by thunder and storms more than other seasons).
+
+The teacher then gives explicit numerical relationships for time units. One full day (from sunrise to the next sunrise) is said to contain 60 muhūrtas, divided equally between day and night:
+1 day (sunrise to next sunrise) = 60 muhūrtas
+1 daylight period = 30 muhūrtas
+1 night period = 30 muhūrtas
+
+A single muhūrta is noted to be traditionally taken as 2.5 nāḷigai, but he postpones fuller discussion of that system to another talk. A phrase glossed as “ṣaṣṭiś ca triṃśaka‑valgāḥ” is taken to mean that each ṛtu has 60 days, each day being a “triṃśaka” day of 30 muhūrtas. So, in muhūrtas:
+Muhūrtas in one ṛtu (days only):
+60 days × 30 muhūrtas/day = 1800 muhūrtas
+
+If we count full day + night:
+Muhūrtas in one ṛtu (full day + night):
+60 full days × 60 muhūrtas/full day = 3600 muhūrtas
+
+He then treats “śukla‑kṛṣṇau ca ṣaṣṭikau.” Here, “śukla” and “kṛṣṇa” refer to the bright and dark fortnights (pakṣas) of 15 tithis each. “Ṣaṣṭikau” is read as “two sets of 60”: 60 days and 60 nights per ṛtu. Two months form one ṛtu, and each month has one Śukla pakṣa and one Kṛṣṇa pakṣa, so:
+1 ṛtu = 2 months
+1 ṛtu = 2 Śukla pakṣas + 2 Kṛṣṇa pakṣas
+1 ṛtu = 60 days + 60 nights
+
+He also stresses the dharma‑śāstra definition of “day”: the day runs from sunrise (sūryodaya) to sunset (sūryāstamana), and “night” from sunset to the next sunrise. Together, this 24‑hour cycle is:
+1 civil day = 1 full śāstra day (sunrise to next sunrise) = 60 muhūrtas
+
+By the end of Part 1, the listener has a structured picture: faithless study of śāstra cannot reveal the path to the fruits of sukṛta, while śāstra itself provides a finely quantized view of time—days divided into muhūrtas, grouped into pakṣas, months, and then into six orderly ṛtus that succeed one another without gaps, each with its own nature and characteristic sound.
