@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -111,6 +110,42 @@
     }
     select option{ background:#0b1020; }
 
+    /* NEW: Links row (your (1) and (2)) */
+    .linksRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      width:100%;
+      max-width: 980px; /* keeps it visually aligned with the dropdowns area */
+      margin: 2px auto 0;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .pillLink{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+      backdrop-filter: blur(12px);
+      color: rgba(255,255,255,0.92);
+      cursor:pointer;
+      text-decoration:none;
+      font-size: 13.5px;
+      white-space: nowrap;
+      user-select:none;
+    }
+
+    .pillLink:hover{
+      border-color: rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.08);
+    }
+
     /* Toggle (centered, obvious) */
     .toggleRow{
       display:flex;
@@ -198,10 +233,90 @@
       color: rgba(255,255,255,0.65);
     }
 
+    /* NEW: Modal for Excel sheet view */
+    .modalBackdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,0.62);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modal{
+      width:min(1100px, 96vw);
+      max-height: 86vh;
+      background: rgba(10,14,28,0.92);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 18px;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.65);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+    .modalHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .modalHeader h3{
+      margin:0;
+      font-size: 15px;
+      font-weight: 650;
+    }
+    .modalHeader .modalBtns{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .iconBtn{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.92);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-size: 13px;
+    }
+    .iconBtn:hover{
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.28);
+    }
+    .modalBody{
+      padding: 12px 14px 14px;
+      overflow:auto;
+    }
+
+    /* Excel table styling (works with SheetJS HTML output) */
+    .excelTableWrap table{
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      background: rgba(255,255,255,0.03);
+    }
+    .excelTableWrap td, .excelTableWrap th{
+      border: 1px solid rgba(255,255,255,0.14);
+      padding: 8px 10px;
+      vertical-align: top;
+      color: rgba(255,255,255,0.92);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .excelTableWrap th{
+      background: rgba(255,255,255,0.06);
+      font-weight: 650;
+    }
+
     @media (max-width:640px){
       .bannerFrame img{ height:140px; }
       select{ min-width:260px; }
       .docBody{ max-height: 62vh; }
+      .linksRow{ justify-content:center; }
     }
   </style>
 </head>
@@ -230,6 +345,17 @@
           <label for="dateSelect">Podcast</label>
           <select id="dateSelect"></select>
         </div>
+      </div>
+
+      <!-- NEW: Two links row (1) and (2) -->
+      <div class="linksRow">
+        <a id="linkPanchadisSummary" class="pillLink" href="javascript:void(0)">
+          Panchadis summary
+        </a>
+
+        <a id="linkLineByLineSummary" class="pillLink" href="javascript:void(0)">
+          line by line summary
+        </a>
       </div>
 
       <!-- Toggle -->
@@ -268,6 +394,25 @@
     </div>
 
   </div>
+
+  <!-- NEW: Excel modal -->
+  <div id="excelModalBackdrop" class="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="excelModalTitle">
+      <div class="modalHeader">
+        <h3 id="excelModalTitle">Loading…</h3>
+        <div class="modalBtns">
+          <button id="excelModalOpenFile" class="iconBtn" type="button">Open Excel</button>
+          <button id="excelModalClose" class="iconBtn" type="button">Close</button>
+        </div>
+      </div>
+      <div id="excelModalBody" class="modalBody">
+        Loading…
+      </div>
+    </div>
+  </div>
+
+  <!-- SheetJS (XLSX) for reading the Excel file in-browser -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script src="script.js"></script>
 </body>
