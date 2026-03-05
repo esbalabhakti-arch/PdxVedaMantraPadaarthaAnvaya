@@ -161,7 +161,6 @@ const TOPIC_LIBRARY = [
     ]
   },
 
-  // ✅ Move Laghu Sankalpam under Panchangam topic
   {
     topic: "Panchangam (Shri Ashok Krishnamoorthy)",
     episodes: [
@@ -171,8 +170,8 @@ const TOPIC_LIBRARY = [
         title: "Understanding Laghu Sankalpam (Shri Ashok K)",
         audio: "Audio/20260131_1.mp4",
         transcriptionDocx: "Images/sankalpa_transcription.txt",
-        summaryDocx: "Images/sankalpa_summary.txt",        // readable text shown on page
-        summaryPdf: "Images/sankalpa_summary.pdf",         // link shown on top
+        summaryDocx: "Images/sankalpa_summary.txt",
+        summaryPdf: "Images/sankalpa_summary.pdf",
         note: "Laghu sankalpam basics"
       },
       {
@@ -181,7 +180,7 @@ const TOPIC_LIBRARY = [
         title: "Understanding Maha Sankalpam - Part#1 (Shri Ashok K)",
         audio: "Audio/20260204_Panchangam_1.mp4",
         transcriptionDocx: "Images/Mahasankalpam_transcription.txt",
-        summaryDocx: "Images/Mahasankalpam_summary.txt",        // readable text shown on page
+        summaryDocx: "Images/Mahasankalpam_summary.txt",
         note: "Maha sankalpam basics"
       },
       {
@@ -190,7 +189,7 @@ const TOPIC_LIBRARY = [
         title: "Understanding Maha Sankalpam - Part#2 (Shri Ashok K)",
         audio: "Audio/20260204_Panchangam_2.mp4",
         transcriptionDocx: "Images/Mahasankalpam_transcription_part2.txt",
-        summaryDocx: "Images/Mahasankalpam_summary_part2.txt",        // readable text shown on page
+        summaryDocx: "Images/Mahasankalpam_summary_part2.txt",
         note: "Maha sankalpam basics"
       }
     ]
@@ -198,7 +197,7 @@ const TOPIC_LIBRARY = [
 ];
 
 // ------------------------------
-// NEW: Excel config (2 links)
+// Excel config (2 links)
 // ------------------------------
 const PANCHADIS_XLSX_PATH = "Images/Panchadis_Meaning_summaries.xlsx";
 const SHEET_FULL_PANCHADIS = "Full_Panchadis";
@@ -222,11 +221,11 @@ const docTitle = $("docTitle");
 const docBody = $("docBody");
 const docError = $("docError");
 
-// NEW: top links
+// top links
 const linkPanchadisSummary = $("linkPanchadisSummary");
 const linkLineByLineSummary = $("linkLineByLineSummary");
 
-// NEW: modal elements
+// modal elements
 const excelModalBackdrop = $("excelModalBackdrop");
 const excelModalTitle = $("excelModalTitle");
 const excelModalBody = $("excelModalBody");
@@ -240,7 +239,7 @@ let currentMode = "transcription"; // "transcription" | "summary"
 let currentTopic = TOPIC_LIBRARY[0]?.topic || "";
 let currentEpisode = null;
 
-// NEW: workbook cache
+// workbook cache
 let _panchadisWorkbook = null;
 let _panchadisWorkbookPromise = null;
 
@@ -371,9 +370,6 @@ async function loadEpisode(ep) {
   if (currentMode === "transcription") {
     await loadTxtToHtml(ep.transcriptionDocx);
   } else {
-    // Summary view:
-    // 1) show PDF link(s) on top if available
-    // 2) show summary TXT below
     if (ep.summaryPdf && typeof ep.summaryPdf === "string" && ep.summaryPdf.trim()) {
       clearError(docError);
 
@@ -422,7 +418,6 @@ function populateTopicSelect() {
     topicSelect.appendChild(opt);
   });
 
-  // Default = first
   topicSelect.value = currentTopic || topics[0];
 }
 
@@ -446,12 +441,11 @@ function populatePodcastSelect(topicObj) {
     podcastSelect.appendChild(opt);
   });
 
-  // Default = newest
   podcastSelect.value = eps[0].id;
 }
 
 // ------------------------------
-// NEW: Excel sheet viewer
+// Excel sheet viewer
 // ------------------------------
 function openExcelModal(titleText, bodyHtml) {
   if (!excelModalBackdrop || !excelModalTitle || !excelModalBody) return;
@@ -461,8 +455,6 @@ function openExcelModal(titleText, bodyHtml) {
 
   excelModalBackdrop.style.display = "flex";
   excelModalBackdrop.setAttribute("aria-hidden", "false");
-
-  // basic focus management
   (excelModalClose || excelModalOpenFile || excelModalBackdrop).focus?.();
 }
 
@@ -506,8 +498,6 @@ function renderSheetToHtmlTable(wb, sheetName) {
     );
   }
 
-  // This returns a complete <table>…</table> string.
-  // We wrap it to apply our CSS styles.
   const tableHtml = XLSX.utils.sheet_to_html(ws, {
     id: "excelTable",
     editable: false
@@ -522,7 +512,6 @@ async function showPanchadisSheet(sheetName, titleLabel) {
     const wb = await loadPanchadisWorkbookOnce();
     const html = renderSheetToHtmlTable(wb, sheetName);
 
-    // Add a small header row with where the file is
     const header = `
       <div style="margin-bottom:10px;color:rgba(255,255,255,0.75);font-size:12.5px;">
         Source: <span style="opacity:0.9">${PANCHADIS_XLSX_PATH}</span> (Sheet: <strong>${sheetName}</strong>)
@@ -531,7 +520,10 @@ async function showPanchadisSheet(sheetName, titleLabel) {
 
     openExcelModal(titleLabel, header + html);
   } catch (err) {
-    openExcelModal(titleLabel, `<div style="white-space:pre-wrap;color:rgba(255,255,255,0.92);">${escapeHtml(String(err))}</div>`);
+    openExcelModal(
+      titleLabel,
+      `<div style="white-space:pre-wrap;color:rgba(255,255,255,0.92);">${escapeHtml(String(err))}</div>`
+    );
   }
 }
 
@@ -564,7 +556,7 @@ btnSummary?.addEventListener("click", async () => {
   if (currentEpisode) await loadEpisode(currentEpisode);
 });
 
-// NEW: link clicks (1) and (2)
+// top link clicks
 linkPanchadisSummary?.addEventListener("click", async () => {
   await showPanchadisSheet(SHEET_FULL_PANCHADIS, "Panchadis summary");
 });
@@ -573,7 +565,7 @@ linkLineByLineSummary?.addEventListener("click", async () => {
   await showPanchadisSheet(SHEET_LINE_BY_LINE, "line by line summary");
 });
 
-// NEW: modal controls
+// modal controls
 excelModalClose?.addEventListener("click", closeExcelModal);
 excelModalOpenFile?.addEventListener("click", () => {
   window.open(PANCHADIS_XLSX_PATH, "_blank", "noopener");
@@ -595,10 +587,8 @@ document.addEventListener("keydown", (e) => {
 // Initial load
 // ------------------------------
 (function init() {
-  // Topic dropdown
   populateTopicSelect();
 
-  // Podcast dropdown for selected topic
   const topicObj = findTopicObj(topicSelect?.value || currentTopic);
   currentTopic = topicObj?.topic || currentTopic;
 
