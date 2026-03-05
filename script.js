@@ -104,7 +104,7 @@ const TOPIC_LIBRARY = [
         summaryDocx: "Images/110_6th_Panchadi_summary.txt",
         note: "Aruna Prashnam - Panchadi 6"
       },
-            {
+      {
         id: "111_Panchadi_7",
         date: "2026-02-13",
         title: "Aruna Prashnam - Panchadi 7",
@@ -175,7 +175,7 @@ const TOPIC_LIBRARY = [
         summaryPdf: "Images/sankalpa_summary.pdf",         // link shown on top
         note: "Laghu sankalpam basics"
       },
-       {
+      {
         id: "P02_Sankalpam_Basics",
         date: "2026-02-04",
         title: "Understanding Maha Sankalpam - Part#1 (Shri Ashok K)",
@@ -184,7 +184,7 @@ const TOPIC_LIBRARY = [
         summaryDocx: "Images/Mahasankalpam_summary.txt",        // readable text shown on page
         note: "Maha sankalpam basics"
       },
-       {
+      {
         id: "P03_Sankalpam_Basics",
         date: "2026-02-04",
         title: "Understanding Maha Sankalpam - Part#2 (Shri Ashok K)",
@@ -196,6 +196,13 @@ const TOPIC_LIBRARY = [
     ]
   }
 ];
+
+// ------------------------------
+// NEW: Excel config (2 links)
+// ------------------------------
+const PANCHADIS_XLSX_PATH = "Images/Panchadis_Meaning_summaries.xlsx";
+const SHEET_FULL_PANCHADIS = "Full_Panchadis";
+const SHEET_LINE_BY_LINE = "Line_by_Line";
 
 // ------------------------------
 // UI Elements
@@ -215,12 +222,27 @@ const docTitle = $("docTitle");
 const docBody = $("docBody");
 const docError = $("docError");
 
+// NEW: top links
+const linkPanchadisSummary = $("linkPanchadisSummary");
+const linkLineByLineSummary = $("linkLineByLineSummary");
+
+// NEW: modal elements
+const excelModalBackdrop = $("excelModalBackdrop");
+const excelModalTitle = $("excelModalTitle");
+const excelModalBody = $("excelModalBody");
+const excelModalClose = $("excelModalClose");
+const excelModalOpenFile = $("excelModalOpenFile");
+
 // ------------------------------
 // State
 // ------------------------------
 let currentMode = "transcription"; // "transcription" | "summary"
 let currentTopic = TOPIC_LIBRARY[0]?.topic || "";
 let currentEpisode = null;
+
+// NEW: workbook cache
+let _panchadisWorkbook = null;
+let _panchadisWorkbookPromise = null;
 
 // ------------------------------
 // Helpers
@@ -429,6 +451,91 @@ function populatePodcastSelect(topicObj) {
 }
 
 // ------------------------------
+// NEW: Excel sheet viewer
+// ------------------------------
+function openExcelModal(titleText, bodyHtml) {
+  if (!excelModalBackdrop || !excelModalTitle || !excelModalBody) return;
+
+  excelModalTitle.textContent = titleText;
+  excelModalBody.innerHTML = bodyHtml;
+
+  excelModalBackdrop.style.display = "flex";
+  excelModalBackdrop.setAttribute("aria-hidden", "false");
+
+  // basic focus management
+  (excelModalClose || excelModalOpenFile || excelModalBackdrop).focus?.();
+}
+
+function closeExcelModal() {
+  if (!excelModalBackdrop) return;
+  excelModalBackdrop.style.display = "none";
+  excelModalBackdrop.setAttribute("aria-hidden", "true");
+}
+
+async function loadPanchadisWorkbookOnce() {
+  if (_panchadisWorkbook) return _panchadisWorkbook;
+  if (_panchadisWorkbookPromise) return _panchadisWorkbookPromise;
+
+  _panchadisWorkbookPromise = (async () => {
+    if (typeof XLSX === "undefined") {
+      throw new Error("XLSX library not loaded. (Check the SheetJS <script> tag in index.html)");
+    }
+
+    const res = await fetch(PANCHADIS_XLSX_PATH, { cache: "no-cache" });
+    if (!res.ok) {
+      throw new Error(
+        `Could not load Excel file:\n${PANCHADIS_XLSX_PATH}\n\nMake sure you uploaded it to the Images folder and the name matches exactly.`
+      );
+    }
+
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    _panchadisWorkbook = wb;
+    return wb;
+  })();
+
+  return _panchadisWorkbookPromise;
+}
+
+function renderSheetToHtmlTable(wb, sheetName) {
+  const ws = wb.Sheets[sheetName];
+  if (!ws) {
+    const available = (wb.SheetNames || []).join(", ");
+    throw new Error(
+      `Sheet not found: "${sheetName}"\n\nAvailable sheets: ${available}`
+    );
+  }
+
+  // This returns a complete <table>…</table> string.
+  // We wrap it to apply our CSS styles.
+  const tableHtml = XLSX.utils.sheet_to_html(ws, {
+    id: "excelTable",
+    editable: false
+  });
+
+  return `<div class="excelTableWrap">${tableHtml}</div>`;
+}
+
+async function showPanchadisSheet(sheetName, titleLabel) {
+  try {
+    openExcelModal(titleLabel, "Loading…");
+    const wb = await loadPanchadisWorkbookOnce();
+    const html = renderSheetToHtmlTable(wb, sheetName);
+
+    // Add a small header row with where the file is
+    const header = `
+      <div style="margin-bottom:10px;color:rgba(255,255,255,0.75);font-size:12.5px;">
+        Source: <span style="opacity:0.9">${PANCHADIS_XLSX_PATH}</span> (Sheet: <strong>${sheetName}</strong>)
+      </div>
+    `;
+
+    openExcelModal(titleLabel, header + html);
+  } catch (err) {
+    openExcelModal(titleLabel, `<div style="white-space:pre-wrap;color:rgba(255,255,255,0.92);">${escapeHtml(String(err))}</div>`);
+  }
+}
+
+// ------------------------------
 // Event handlers
 // ------------------------------
 topicSelect?.addEventListener("change", async () => {
@@ -455,6 +562,33 @@ btnTranscription?.addEventListener("click", async () => {
 btnSummary?.addEventListener("click", async () => {
   setToggle("summary");
   if (currentEpisode) await loadEpisode(currentEpisode);
+});
+
+// NEW: link clicks (1) and (2)
+linkPanchadisSummary?.addEventListener("click", async () => {
+  await showPanchadisSheet(SHEET_FULL_PANCHADIS, "Panchadis summary");
+});
+
+linkLineByLineSummary?.addEventListener("click", async () => {
+  await showPanchadisSheet(SHEET_LINE_BY_LINE, "line by line summary");
+});
+
+// NEW: modal controls
+excelModalClose?.addEventListener("click", closeExcelModal);
+excelModalOpenFile?.addEventListener("click", () => {
+  window.open(PANCHADIS_XLSX_PATH, "_blank", "noopener");
+});
+
+// close when clicking outside the modal
+excelModalBackdrop?.addEventListener("click", (e) => {
+  if (e.target === excelModalBackdrop) closeExcelModal();
+});
+
+// close on Esc
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && excelModalBackdrop?.style.display === "flex") {
+    closeExcelModal();
+  }
 });
 
 // ------------------------------
