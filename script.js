@@ -157,6 +157,15 @@ const TOPIC_LIBRARY = [
         transcriptionDocx: "Images/116_9th_Panchadi_Part2_transcription.txt",
         summaryDocx: "Images/116_9th_Panchadi_Part2_summary.txt",
         note: "Aruna Prashnam - Panchadi 9 - Part2"
+      },
+      {
+        id: "117_Panchadi_10",
+        date: "2026-03-10",
+        title: "Aruna Prashnam - Panchadi 10",
+        audio: "Audio/117_10th_Panchadi.mpeg",
+        transcriptionDocx: "Images/117_10th_Panchadi_transcription.txt",
+        summaryDocx: "Images/117_10th_Panchadi_summary.txt",
+        note: "Aruna Prashnam - Panchadi 10"
       }
     ]
   },
