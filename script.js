@@ -166,6 +166,24 @@ const TOPIC_LIBRARY = [
         transcriptionDocx: "Images/117_10th_Panchadi_transcription.txt",
         summaryDocx: "Images/117_10th_Panchadi_summary.txt",
         note: "Aruna Prashnam - Panchadi 10"
+      },
+      {
+        id: "118_Panchadi_11_Part1",
+        date: "2026-03-26",
+        title: "Aruna Prashnam - Panchadi 11-Part1",
+        audio: "Audio/118_11th_Panchadi_Part1.mpeg",
+        transcriptionDocx: "Images/118_11th_Panchadi_Part1_transcription.txt",
+        summaryDocx: "Images/118_11th_Panchadi_Part1_summary.txt",
+        note: "Aruna Prashnam - Panchadi 11 Part1"
+      },
+      {
+        id: "119_Panchadi_11_Part2",
+        date: "2026-03-26",
+        title: "Aruna Prashnam - Panchadi 11-Part2",
+        audio: "Audio/119_11th_Panchadi_Part2.mpeg",
+        transcriptionDocx: "Images/119_11th_Panchadi_Part2_transcription.txt",
+        summaryDocx: "Images/119_11th_Panchadi_Part2_summary.txt",
+        note: "Aruna Prashnam - Panchadi 11 Part2"
       }
     ]
   },
